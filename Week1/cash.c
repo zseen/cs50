@@ -3,36 +3,28 @@
 
 int main(void)
 {
-    int coinsCounter = 0;
-    double money;
+	int coinsCounter = 0;
+	double money;
+	int coinValues[4] = { 25, 10, 5, 1 };
 
-    do
-    {
+	do
+	{
 		money = get_double("How much should the change be?: ");
-    }
+	}
 
-    while(money < 0);
-    {
+	while (money < 0);
 
-        money = money * 100;
-		//money = round(money);
-		//printf("%f", money);
+	{
+		money = money * 100;
 
-        coinsCounter += money / 25;
-        money = (int)money % 25;
+		while (money != 0)
+			for (int i = 0; i < 4; i++)
+			{
+				coinsCounter += money / coinValues[i];
+				money = (int)money % coinValues[i];
+			}
 
-        coinsCounter += money / 10;
-        money = (int)money % 10;
+		printf("%i\n", coinsCounter);
 
-        coinsCounter += money / 5;
-        money = (int)money % 5;
-
-        coinsCounter += money / 1;
-
-        printf("%i\n", coinsCounter);
-
-		gets();
-    }
-
-
+	}
 }
