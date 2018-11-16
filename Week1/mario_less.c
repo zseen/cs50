@@ -2,13 +2,9 @@
 #include <cs50.h>
 
 
-
 int main(void)
 {
     int height = -1;
-    int spacesNum;
-    int hashesNum;
-
 
     while (height < 0 || height > 23)
     {
@@ -17,12 +13,12 @@ int main(void)
 
     for (int i = 2; i <= height + 1; i++)
     {
-        for (spacesNum = 0; spacesNum < (height - i + 1); spacesNum++)
+        for (int spacesNum = 0; spacesNum < (height - i + 1); spacesNum++)
         {
             printf(" ");
         }
 
-        for (hashesNum = 0; hashesNum < i; hashesNum++)
+        for (int hashesNum = 0; hashesNum < i; hashesNum++)
         {
             printf("#");
         }
