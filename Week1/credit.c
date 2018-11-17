@@ -13,15 +13,16 @@ int getLength(long long cardNumber)
     return length;
 }
 
-long long getStartingCharacters(long long cardNumber)
+int getStartingCharacters(long long cardNumber)
 {
-    int firstTwoChars = 0;
+    int firstTwoDigits = 0;
     while (cardNumber > 99)
     {
-        firstTwoChars = cardNumber % 10;
+        firstTwoDigits = cardNumber % 10;
         cardNumber /= 10;
     }
-    return cardNumber;
+    firstTwoDigits = (int)cardNumber;
+    return firstTwoDigits;
 }
 
 int getDigitsModifiedSum(long long cardNumber)
@@ -54,21 +55,21 @@ int getDigitsModifiedSum(long long cardNumber)
 
 char* determineCardType(long long cardNumber)
 {
-    long long firstTwoChars = getStartingCharacters(cardNumber);
+    int firstTwoDigits = getStartingCharacters(cardNumber);
     int cardNumberLength = getLength(cardNumber);
     int allDigitsSum = getDigitsModifiedSum(cardNumber);
 
     if (allDigitsSum % 10 == 0)
     {
-        if (cardNumberLength == 15 && (firstTwoChars == 37 || firstTwoChars == 34))
+        if (cardNumberLength == 15 && (firstTwoDigits == 37 || firstTwoDigits == 34))
         {
             return "AMEX";
         }
-        else if ((firstTwoChars >= 40 && firstTwoChars <= 49) && (cardNumberLength == 13 || cardNumberLength == 16))
+        else if ((firstTwoDigits >= 40 && firstTwoDigits <= 49) && (cardNumberLength == 13 || cardNumberLength == 16))
         {
             return "VISA";
         }
-        else if ((firstTwoChars >= 51 && firstTwoChars <= 55) && cardNumberLength == 16)
+        else if ((firstTwoDigits >= 51 && firstTwoDigits <= 55) && cardNumberLength == 16)
         {
             return "MASTERCARD";
         }
