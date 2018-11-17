@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <cs50.h>
 
-
 int main(void)
 {
     int height = -1;
@@ -25,7 +24,7 @@ int main(void)
 
         printf("  ");
 
-        for (hashesNum = 0; hashesNum < i; hashesNum++)
+        for (int hashesNum = 0; hashesNum < i; hashesNum++)
         {
             printf("#");
         }
