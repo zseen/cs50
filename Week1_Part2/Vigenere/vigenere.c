@@ -15,24 +15,26 @@ int main(int argc, string argv[])
 
     }
     string key = (argv[1]);
-    printf("%s", key);
+    //printf("%s", key);
     string plaintext = get_string("Give me a string to cipher: ");
     char ciphertext[strlen(plaintext)];
     int keyLength = strlen(key);
 
     for (int i = 0, k = 0; i < strlen(plaintext); i++)
     {
-        //for (int j = 0; j <keyLength; j++)
         if (isupper(plaintext[i]))
         {
-            ciphertext[i] = ((plaintext[i]) - 65) + key[k++ % keyLength] % 26 + 65;
-            char j = ciphertext[i];
+            int keychar = tolower(key[k++ % keyLength] - 97) % 26;
+            //printf("%i\n", keychar);
+            ciphertext[i] = ((plaintext[i] + keychar) - 'A') % 26 + 'A';
+            char q = ciphertext[i];
             string g = ciphertext;
         }
 
         else if (islower(plaintext[i]))
         {
-            ciphertext[i] = (plaintext[i]) - 97 + key[k++ % keyLength] % 26 + 97;
+            int keychar = tolower(key[k++ % keyLength] - 97) % 26;
+            ciphertext[i] = ((plaintext[i] + keychar) - 'a') % 26 + 'a';
         }
         else
         {
