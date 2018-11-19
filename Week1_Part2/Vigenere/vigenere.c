@@ -3,6 +3,8 @@
 #include <string.h>
 #include <ctype.h>
 
+const unsigned lenAlphabet = 26;
+
 int main(int argc, char* argv[])
 {
     if (argc != 2)
@@ -28,15 +30,15 @@ int main(int argc, char* argv[])
     {
         if (isalpha(plaintext[i]))
         {
-            int keychar = (toupper(key[k++ % keyLength]) - 'A') % 26;
+            int keychar = (toupper(key[k++ % keyLength]) - 'A') % lenAlphabet;
 
             if (isupper(plaintext[i]))
             {
-                ciphertext[i] = ((plaintext[i] + keychar) - 'A') % 26 + 'A';
+                ciphertext[i] = ((plaintext[i] + keychar) - 'A') % lenAlphabet + 'A';
             }
             else
             {  
-                ciphertext[i] = ((plaintext[i] + keychar) - 'a') % 26 + 'a';
+                ciphertext[i] = ((plaintext[i] + keychar) - 'a') % lenAlphabet + 'a';
             }
         }
         else
