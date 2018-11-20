@@ -11,7 +11,7 @@
 
 char* createAlphabet(firstLetter)
 {
-    char alphabet[26];
+    char* alphabet = (char*)malloc((26 + 1) * sizeof(char));
 
     for (int letter = firstLetter, i = 0; letter < ((int)firstLetter + 26); letter++)
     {
@@ -19,8 +19,7 @@ char* createAlphabet(firstLetter)
         //printf("%c", letter);
        
     }
-    char* alp = (char*)malloc((strlen(alphabet) + 1) * sizeof(char));
-    return alp;
+    return alphabet;
 }
 
 
@@ -47,8 +46,8 @@ int main(void)
     //char password[6] = { '\0' };
     //char* salt[3] = {hashedPassword[0], hashedPassword[1]};
 
-    char* alphabet[26] = {0};
-    createAlphabet('A', alphabet);
+    char* alphabet = { createAlphabet('A') };
+    
     
     for (int i = 0; i < 26; i++)
     {
