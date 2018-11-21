@@ -1,11 +1,11 @@
 char* generateInitialPW(int i)
 {
-
+    //from 'a', if 'z' -> make it 'a' + 'a'
 }
 
 char* generateFinalPW(int i)
 {
-
+    //from the end, fill up with 'Z'-s
 }
 
 void increaseCharacter(char* c) // here c points to exactly one character as far as the function knows
