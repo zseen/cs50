@@ -20,8 +20,9 @@ int duration(string fraction)
 int frequency(string note)
 {
     //printf("%s", note);
+   
     int A4 = 440;
-    int numSeminotes = 12;
+    
 
     int noteLength = strlen(note);
     char letter = note[0];
@@ -29,11 +30,22 @@ int frequency(string note)
     //printf("%c", letter);
     number = note[strlen(note) - 1];
     //printf("%c", number);
+    float distance = 0;
+
+    if (letter == 'B')
+    {
+        distance += 2;
+       
+        
+    }
+    
+
+    double semiTone;
 
     
 
-
-    float frequency;
+  
+    int frequency;
 
     for (int i = 0; i < number - 47; i++)
     {
@@ -42,25 +54,37 @@ int frequency(string note)
         {
           
             char modifier = note[strlen(note) - 2];
-            double semiTone = pow(2, (1.0 / 12.0));
+            
         
           
             if (modifier == '#')
-            {
-                
-                frequency = round(pow(2, (i - 4)) * 440 * semiTone);
-                
+            {   
+                distance += 1;
+                semiTone = pow(2, (distance / 12.0));
+                frequency = getFrequenciesOfNoteA(i) * semiTone;               
             }
             else
             {
-                frequency = round(pow(2, (i - 4)) * 440 / semiTone);           
+                int freqA = getFrequenciesOfNoteA(i);
+               
+                semiTone = pow(2, ((distance -1) / 12.0));
+
+                printf("%f", semiTone);
+                frequency = freqA * semiTone;
             }
         }
         else
         {
-            frequency = round(pow(2, (i - 4)) * 440);           
+            semiTone = pow(2, (distance / 12.0));
+            frequency = getFrequenciesOfNoteA(i) * semiTone;
         }
     }  
+    return frequency;
+}
+
+int getFrequenciesOfNoteA(i)
+{
+    int frequency = round(pow(2, (i - 4)) * 440);
     return frequency;
 }
 
