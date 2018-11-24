@@ -30,64 +30,82 @@ int frequency(string note)
     //printf("%c", letter);
     number = note[strlen(note) - 1];
     //printf("%c", number);
-    float distance = 0;
+    int distance = 0;
 
     if (letter == 'B')
     {
-        distance += 2;
-       
-        
+        distance += 2;  
     }
-    
-
-    double semiTone;
-
-    
-
+    else if (letter == 'G')
+    {
+        distance -= 2;
+    }
+    else if (letter == 'F')
+    {
+        distance -= 4;
+    }
+    else if (letter == 'E')
+    {
+        distance -= 5;
+    }
+    else if (letter == 'D')
+    {
+        distance -= 7;
+    }
+    else if (letter == 'C')
+    {
+        distance -= 9;
+    }
+     
+    float semiTone;
   
-    int frequency;
+    float frequency;
 
     for (int i = 0; i < number - 47; i++)
     {
-        //printf("%d", i);
         if (noteLength == 3)
         {
-          
             char modifier = note[strlen(note) - 2];
-            
-        
-          
+            float freqA = getFrequenciesOfNoteA(i);
+ 
             if (modifier == '#')
             {   
-                distance += 1;
-                semiTone = pow(2, (distance / 12.0));
-                frequency = getFrequenciesOfNoteA(i) * semiTone;               
+                //semiTone = getSemiTone(distance + 1);
+                //printf("%f", semiTone);
+                semiTone = pow(2, ((distance + 1) / 12.0));
+                frequency = freqA * semiTone;               
             }
             else
-            {
-                int freqA = getFrequenciesOfNoteA(i);
-               
-                semiTone = pow(2, ((distance -1) / 12.0));
-
-                printf("%f", semiTone);
+            {     
+                //semiTone = getSemiTone(distance - 1);
+                semiTone = pow(2, ((distance - 1) / 12.0));
+                //printf("%f", semiTone);
                 frequency = freqA * semiTone;
             }
         }
         else
         {
+            //semiTone = getSemiTone(distance);
             semiTone = pow(2, (distance / 12.0));
+            printf("%f", semiTone);
+            
             frequency = getFrequenciesOfNoteA(i) * semiTone;
         }
     }  
-    return frequency;
+    return (int) round(frequency);
 }
 
-int getFrequenciesOfNoteA(i)
+float getFrequenciesOfNoteA(i)
 {
-    int frequency = round(pow(2, (i - 4)) * 440);
-    return frequency;
+    float freq = (pow(2, (i - 4)) * 440);
+    return freq;
 }
 
+float getSemiTone(distance)
+{
+    float semiTone = pow(2, (distance / 12.0));
+    return semiTone;
+}
 // Determines whether a string represents a rest
 bool is_rest(string s)
 {
