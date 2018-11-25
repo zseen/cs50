@@ -10,8 +10,9 @@
 // Converts a fraction formatted as X/Y to eighths
 int duration(string fraction)
 {
-    int numerator = fraction[0];
-    int denominator = fraction[1];
+    int numerator = fraction[0] - '0';
+    int denominator = fraction[2] - '0';
+
     int eightsNote = 8 / denominator * numerator;
     return eightsNote;
 }
@@ -41,20 +42,17 @@ int frequency(string note)
             if (modifier == '#')
             {
                 semiTone = getSemiTone(distance + 1);
-                frequency = freqA * semiTone;
             }
             else
             {
                 semiTone = getSemiTone(distance - 1);
-                frequency = freqA * semiTone;
             }
         }
         else
         {
-            printf("%d", distance);
-            semiTone = getSemiTone(distance);
-            frequency = freqA * semiTone;
+            semiTone = getSemiTone(distance);           
         }
+        frequency = freqA * semiTone;
     }
     return  (int)round(frequency);
 }
