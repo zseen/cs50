@@ -64,7 +64,7 @@ static FILE *wav_open(const char *filename)
     header.block_align = bits_per_sample / 8;
     header.bits_per_sample = bits_per_sample;
     header.data_length = 0;
-    FILE *file = fopen(filename, "w+");
+    FILE *file = fopen(filename, "w+b");
     if (!file)
     {
         return NULL;
