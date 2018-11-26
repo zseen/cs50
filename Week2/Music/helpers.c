@@ -23,12 +23,8 @@ int frequency(string note)
     int noteLength = strlen(note);
     char letter = note[0];
     char number = note[strlen(note) - 1];
-
-    int getDistanceFromA();
+    
     int distance = getDistanceFromA(letter);
-
-    float getSemiTone();
-    float getFrequenciesOfNoteA();
     float semiTone;
     float frequency;
 
