@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cs50.h>
 #include <io.h>
-#include <crypt.h>
+//#include <crypt.h>
 #include <string.h>
 #include <ctype.h>
 #define _XOPEN_SOURCE
@@ -11,14 +11,15 @@ char* generateInitialPW(int size)
 {
     char* guess = (char*)malloc((size + 1) * sizeof(char));
     //alloc char* array guess i length, beletölt size db a-t
-    for (int i = 0; i <= size; i++)
+    for (int i = 0; i < size; i++)
     {
         guess[i] = 'A';
     }
         
    
-    guess[size + 1] = '\0';
+    guess[size] = '\0';
     //how does it generate the in.pw?
+    //printf("%s", guess);
     return guess;
 }
 
@@ -28,11 +29,11 @@ char* generateFinalPW(int size)
     char* finPW = (char*)malloc((size + 1) * sizeof(char));
     
     //what does it exactly do? ad how?
-    for (int i = 0; i <= size; i++)
+    for (int i = 0; i < size; i++)
     {
-        finPW[0] = 'z';
+        finPW[i] = 'z';
     }
-    finPW[size + 1] = '\0';
+    finPW[size] = '\0';
     return finPW;
 }
 
@@ -46,21 +47,33 @@ void getLexicographicalNextString(char* c) // c is a pointer to a char array
 
    //const char* alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     //abcdefghijklmnopqrstuvwxyz
-    //ABCDEFGHIJKLMNOPQRSTUVWXYZ
-    
-    for (int i = strlen(c) - 1; i > 0; i -= i)
+    //ABCDEFGHIJKLMNOPQRSTUVWXYZ 
+    for (int i = strlen(c) - 1; i >= 0; i -= 1)
+       
     {
         if (c[i] == 'Z')
         {
             c[i] = 'a';
-            c[i - 1] += 1;
+            //c[i - 1] += 1;
             break;
+        }
+        else if (c[i] == 'z')
+        {
+          
+            
+            c[i - 1] += 1;
+            c[i] = 'A';
+            break;
+           
         }
         else
         {
-            c[i] += 1;
+            c[strlen(c) - 1] += 1;
+            break;
         } 
-    }    
+    }  
+    
+    //printf("%s", c);
 }
 
 
@@ -90,14 +103,16 @@ int main(int argc, char* argv[])
 
         while (strcmp(currentPW, finalPW) != 0) // not equals
         {
-            char* hash = crypt(currentPW, salt); // from the crypt library
-            if (strcmp(hash, targetHash) == 0)
+            //char* hash = crypt(currentPW, salt); // from the crypt library
+            /*if (strcmp(hash, targetHash) == 0)
             {
                 printf("Solution, %s", currentPW);
                 return 0;
-            }
-
+            }*/
+            
             getLexicographicalNextString(currentPW);
+            printf("%s\n", currentPW);
+            
         }
     }
 
