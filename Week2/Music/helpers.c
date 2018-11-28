@@ -26,6 +26,7 @@ int frequency(string note)
     
     int getDistanceFromA();
     int distance = getDistanceFromA(letter);
+
     float frequency;
     float getSemiTone();
     float getFrequenciesOfNoteA();
@@ -51,7 +52,6 @@ int frequency(string note)
         {
             semiTone = getSemiTone(distance);           
         }
-
         frequency = freqA * semiTone;
     }
     return  (int)round(frequency);
@@ -60,8 +60,8 @@ int frequency(string note)
 float getFrequenciesOfNoteA(int i)
 {
     int A4frequency = 440;
-    int standardStart = i - 4;
-    float freq = (pow(2, standardStart) * A4frequency);
+    int octaveFromA4 = i - 4;
+    float freq = (pow(2, octaveFromA4) * A4frequency);
     return freq;
 }
 
@@ -74,48 +74,31 @@ float getSemiTone(int distance)
 
 int getDistanceFromA(char letter)
 {
+    int distance;
     switch (letter)
     {
-    case 'B':
-        return 2;
-    case 'G':
-        return -2;
-    case 'F':
-        return -4;
-    case 'E':
-        return -5;
-    case 'D':
-        return -7;
-    case 'C':
-        return -9;
-    default:
-        return 0;
+        case 'B':
+            distance = 2;
+            break;
+        case 'G':
+            distance = -2;
+            break;
+        case 'F':
+            distance = -4;
+            break;
+        case 'E':
+            distance = -5;
+            break;
+        case 'D':
+            distance = -7;
+            break;
+        case 'C':
+            distance = -9;
+            break;
+        default:
+            distance = 0;
     }
-    /*if (letter == 'B')
-    {
-        distance += 2;
-    }
-    else if (letter == 'G')
-    {
-        distance -= 2;
-    }
-    else if (letter == 'F')
-    {
-        distance -= 4;
-    }
-    else if (letter == 'E')
-    {
-        distance -= 5;
-    }
-    else if (letter == 'D')
-    {
-        distance -= 7;
-    }
-    else if (letter == 'C')
-    {
-        distance -= 9;
-    }
-    return distance;*/
+    return distance;
 }
 
 // Determines whether a string represents a rest
