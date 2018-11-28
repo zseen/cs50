@@ -24,12 +24,15 @@ int frequency(string note)
     char letter = note[0];
     char number = note[strlen(note) - 1];
     
+    int getDistanceFromA();
     int distance = getDistanceFromA(letter);
-    float semiTone;
     float frequency;
+    float getSemiTone();
+    float getFrequenciesOfNoteA();
 
     for (int i = 0; i < number - 47; i++)
     {
+        float semiTone;
         float freqA = getFrequenciesOfNoteA(i);
         if (noteLength == 3)
         {
@@ -48,28 +51,47 @@ int frequency(string note)
         {
             semiTone = getSemiTone(distance);           
         }
+
         frequency = freqA * semiTone;
     }
     return  (int)round(frequency);
 }
 
-float getFrequenciesOfNoteA(i)
+float getFrequenciesOfNoteA(int i)
 {
-    float freq = (pow(2, (i - 4)) * 440);
+    int A4frequency = 440;
+    int standardStart = i - 4;
+    float freq = (pow(2, standardStart) * A4frequency);
     return freq;
 }
 
-float getSemiTone(distance)
+float getSemiTone(int distance)
 {
-    float semiTone = pow(2, ((distance) / 12.0));
+    float numSemiTonesInOctave = 12.0;
+    float semiTone = pow(2, ((distance) / numSemiTonesInOctave));
     return semiTone;
 }
 
-int getDistanceFromA(letter)
+int getDistanceFromA(char letter)
 {
-    int distance = 0;
-
-    if (letter == 'B')
+    switch (letter)
+    {
+    case 'B':
+        return 2;
+    case 'G':
+        return -2;
+    case 'F':
+        return -4;
+    case 'E':
+        return -5;
+    case 'D':
+        return -7;
+    case 'C':
+        return -9;
+    default:
+        return 0;
+    }
+    /*if (letter == 'B')
     {
         distance += 2;
     }
@@ -93,8 +115,9 @@ int getDistanceFromA(letter)
     {
         distance -= 9;
     }
-    return distance;
+    return distance;*/
 }
+
 // Determines whether a string represents a rest
 bool is_rest(string s)
 {

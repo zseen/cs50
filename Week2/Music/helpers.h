@@ -5,9 +5,6 @@
 // Converts a fraction to eighths
 int duration(string fraction);
 
-int getDistanceFromA();
-float getSemiTone();
-float getFrequenciesOfNoteA();
 
 // Calculates frequency (in Hz) of a note formatted as XY,
 // where X is any of A through G and Y is any of 0 through 8,
