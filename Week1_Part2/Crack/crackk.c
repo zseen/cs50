@@ -59,25 +59,27 @@ void getLexicographicalNextString(char* c) // c is a pointer to a char array
         }
         else if (c[i] == 'z')
         { 
-            c[i] = 'A';
+            //c[i] = 'A';
 
-            int step = 1;
-            
-            while (c[i - step] == 'Z')
+            for (int step = 0; step <= i; step++)
             {
-                c[i - step] = 'a';
-                step++; 
+                if (c[i - step] == 'z')
+                {
+                    c[i - step] = 'A';
+
+                }    
+                c[i - step] += 1;
+                break;
             }
 
-            while (c[i - step] == 'z')
+            for (int step = 1; step < i; step++)
             {
-                c[i - step] = "A";
-                step++;
-            }
-            
-            c[i - 1] += 1;
-            break;
-                                       
+                if (c[i - step] == 'Z')
+                {                   
+                    c[i - step] = 'a';                   
+                }
+                //break;
+            }          
         }
         else
         {
@@ -85,8 +87,6 @@ void getLexicographicalNextString(char* c) // c is a pointer to a char array
             break;
         } 
     }  
-    
-    //printf("%s", c);
 }
 
 
