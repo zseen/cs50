@@ -31,7 +31,7 @@ int frequency(string note)
     float getSemiTone();
     float getFrequenciesOfNoteA();
 
-    for (int i = 0; i < number - 47; i++)
+    for (int i = 0; i < number - '0' + 1; i++)
     {
         float semiTone;
         float freqA = getFrequenciesOfNoteA(i);
