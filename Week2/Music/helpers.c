@@ -7,6 +7,13 @@
 #include "helpers.h"
 #include <math.h>
 
+const int A4_FREQUENCY = 440;
+const float NUM_SEMITONES_IN_OCTAVE = 12.0;
+
+int getDistanceFromA(char letter);
+float getSemiTone();
+float getFrequenciesOfNoteA();
+
 // Converts a fraction formatted as X/Y to eighths
 int duration(string fraction)
 {
@@ -23,52 +30,46 @@ int frequency(string note)
     int noteLength = strlen(note);
     char letter = note[0];
     char number = note[strlen(note) - 1];
-    
-    int getDistanceFromA();
+
     int distance = getDistanceFromA(letter);
-
     float frequency;
-    float getSemiTone();
-    float getFrequenciesOfNoteA();
+    float semiTone;
 
-    for (int i = 0; i < number - '0' + 1; i++)
+
+    if (noteLength == 3)
     {
-        float semiTone;
-        float freqA = getFrequenciesOfNoteA(i);
-        if (noteLength == 3)
-        {
-            char modifier = note[strlen(note) - 2];
+        char modifier = note[strlen(note) - 2];
 
-            if (modifier == '#')
-            {
-                semiTone = getSemiTone(distance + 1);
-            }
-            else
-            {
-                semiTone = getSemiTone(distance - 1);
-            }
+        if (modifier == '#')
+        {
+            semiTone = getSemiTone(distance + 1);
         }
         else
         {
-            semiTone = getSemiTone(distance);           
+            semiTone = getSemiTone(distance - 1);
         }
-        frequency = freqA * semiTone;
     }
-    return  (int)round(frequency);
+    else
+    {
+        semiTone = getSemiTone(distance);
+    }
+
+    float freqA = getFrequenciesOfNoteA(number - '0');
+    frequency = freqA * semiTone;
+
+    return (int)round(frequency);
 }
 
-float getFrequenciesOfNoteA(int i)
+float getFrequenciesOfNoteA(int octave)
 {
-    int A4frequency = 440;
-    int octaveFromA4 = i - 4;
-    float freq = (pow(2, octaveFromA4) * A4frequency);
+    int octaveFromA4 = octave - 4;
+    float freq = (pow(2, octaveFromA4) * A4_FREQUENCY);
     return freq;
 }
 
 float getSemiTone(int distance)
 {
-    float numSemiTonesInOctave = 12.0;
-    float semiTone = pow(2, ((distance) / numSemiTonesInOctave));
+    float semiTone = pow(2, ((distance) / NUM_SEMITONES_IN_OCTAVE));
     return semiTone;
 }
 
@@ -77,26 +78,26 @@ int getDistanceFromA(char letter)
     int distance;
     switch (letter)
     {
-        case 'B':
-            distance = 2;
-            break;
-        case 'G':
-            distance = -2;
-            break;
-        case 'F':
-            distance = -4;
-            break;
-        case 'E':
-            distance = -5;
-            break;
-        case 'D':
-            distance = -7;
-            break;
-        case 'C':
-            distance = -9;
-            break;
-        default:
-            distance = 0;
+    case 'B':
+        distance = 2;
+        break;
+    case 'G':
+        distance = -2;
+        break;
+    case 'F':
+        distance = -4;
+        break;
+    case 'E':
+        distance = -5;
+        break;
+    case 'D':
+        distance = -7;
+        break;
+    case 'C':
+        distance = -9;
+        break;
+    default:
+        distance = 0;
     }
     return distance;
 }
