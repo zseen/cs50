@@ -8,37 +8,36 @@
 
 char* generateInitialPW(int size)
 {
-    char* guess = (char*)malloc((size + 1) * sizeof(char));
+    char* initialPW = (char*)malloc((size + 1) * sizeof(char));
 
     for (int i = 0; i < size; i++)
     {
-        guess[i] = 'A';
+        initialPW[i] = 'A';
     }
-    guess[size] = '\0';
-    return guess;
+    initialPW[size] = '\0';
+    return initialPW;
 }
 
 char* generateFinalPW(int size)
 {
-    char* finPW = (char*)malloc((size + 1) * sizeof(char));
+    char* finalPW = (char*)malloc((size + 1) * sizeof(char));
 
     for (int i = 0; i < size; i++)
     {
-        finPW[i] = 'z';
+        finalPW[i] = 'z';
     }
-    finPW[size] = '\0';
-    return finPW;
+
+    finalPW[size] = '\0';
+    return finalPW;
 }
 
 void getLexicographicalNextString(char* c)
 {
     for (int i = strlen(c) - 1; i >= 0; i -= 1)
-
     {
         if (c[i] == 'Z')
         {
             c[i] = 'a';
-            //c[i - 1] += 1;
             break;
         }
         else if (c[i] == 'z')
@@ -72,21 +71,19 @@ int main(int argc, char* argv[])
         char* finalPW = generateFinalPW(passwordLength);
 
         while (true)
-        {
+        {         
+            if (strcmp(currentPW, finalPW) == 0)
+            {
+                break;
+            }
+
             char* hash = crypt(currentPW, salt);
             if (strcmp(hash, targetHash) == 0)
             {
                 printf("%s\n", currentPW);
                 return 0;
-            }
-            else if (strcmp(currentPW, finalPW) == 0)
-            {
-                break;
-            }
-            else
-            {
-                getLexicographicalNextString(currentPW);
-            }
+            }                   
+                getLexicographicalNextString(currentPW);            
         }
         free(currentPW);
         free(finalPW);
