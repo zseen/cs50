@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <cs50.h>
 #include <io.h>
@@ -8,27 +7,75 @@
 #define _XOPEN_SOURCE
 
 
-
-char* createAlphabet(firstLetter)
+char* generateInitialPW(int size)
 {
-    char* alphabet = (char*)malloc((26 + 1) * sizeof(char));
-
-    for (int letter = firstLetter, i = 0; letter < ((int)firstLetter + 26); letter++)
+    char* guess = (char*)malloc((size + 1) * sizeof(char));
+    //alloc char* array guess i length, beletölt size db a-t
+    for (int i = 0; i < size; i++)
     {
-        alphabet[i++] = (char)letter;
-        //printf("%c", letter);
-       
+        guess[i] = 'A';
     }
-    return alphabet;
+        
+   
+    guess[size] = '\0';
+    //how does it generate the in.pw?
+    //printf("%s", guess);
+    return guess;
+}
+
+char* generateFinalPW(int size)
+{
+    //from the end, fill up with 'Z'-s
+    char* finPW = (char*)malloc((size + 1) * sizeof(char));
+    
+    //what does it exactly do? ad how?
+    for (int i = 0; i < size; i++)
+    {
+        finPW[i] = 'z';
+    }
+    finPW[size] = '\0';
+    return finPW;
 }
 
 
 
-
-int main(void)
+void getLexicographicalNextString(char* c) // c is a pointer to a char array
 {
-    /*if (argc != 2)
+    //how does it get the next lexicographical string? 
+    //a - b- c -....z    A -- Z abZ aca 
+    //char* alphabet = (char*)malloc((53 * sizeof(char)));
+
+   //const char* alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    //abcdefghijklmnopqrstuvwxyz
+    //ABCDEFGHIJKLMNOPQRSTUVWXYZ 
+    for (int i = strlen(c) - 1; i >= 0; i -= 1)
+       
     {
+        if (c[i] == 'Z')
+        {
+            c[i] = 'a';
+            //c[i - 1] += 1;
+            break;
+        }
+        else if (c[i] == 'z')
+        { 
+            c[i] = 'A';
+                 
+        }
+        else
+        {
+            c[i] += 1;
+            //printf("How about this? %s\n", c);
+            break;
+        } 
+    }  
+}
+
+
+int main(int argc, char* argv[])
+{
+    //*if (argc != 2)
+    /*{
         printf("Please give a key to encrypt with!\n");
         return 1;
     }
@@ -39,18 +86,44 @@ int main(void)
             printf("Your key should only consist of letters!\n");
             return 1;
         }
-    }
-*/
-    //char alphabet[53];
-    //char* hashedPassword = argv[1];
-    //char password[6] = { '\0' };
-    //char* salt[3] = {hashedPassword[0], hashedPassword[1]};
+    }*/
+    char* targetHash = argv[1];
+    char password[6] = { '\0' };
+    char salt[3] = {targetHash[0], targetHash[1], '\0'};
 
-    char* alphabet = { createAlphabet('A') };
-    
-    
-    for (int i = 0; i < 26; i++)
+    for (int passwordLength = 1; passwordLength < 6; passwordLength++)
     {
-        printf("%c", alphabet[i]);
-    } 
+        char* currentPW = generateInitialPW(passwordLength);
+        char* finalPW = generateFinalPW(passwordLength);
+       
+
+        while (strcmp(currentPW, finalPW) != 0) // not equals
+        {
+            //char* hash = crypt(currentPW, salt); // from the crypt library
+            /*if (strcmp(hash, targetHash) == 0)
+            {
+                printf("Solution, %s", currentPW);
+                return 0;
+            }*/
+
+            
+            printf("%s: %s\n", "currentPW", currentPW);
+            //printf("%s: %s\n", "finalPW", finalPW);
+            getLexicographicalNextString(currentPW);
+             
+        }
+        if (strcmp(currentPW, finalPW) == 0)
+        {
+            //char* hash = crypt(currentPW, salt); // from the crypt library
+            /*if (strcmp(hash, targetHash) == 0)
+            {
+                printf("Solution, %s", currentPW);
+                return 0;
+            }*/
+
+            printf("%s", currentPW);
+        }
+    }
+
+    return 1;
 }
