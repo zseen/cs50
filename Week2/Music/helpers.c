@@ -27,16 +27,12 @@ int duration(string fraction)
 // Calculates frequency (in Hz) of a note
 int frequency(string note)
 {
-    int noteLength = strlen(note);
-    char letter = note[0];
-    char number = note[strlen(note) - 1];
-
-    int distance = getDistanceFromA(letter);
-    float frequency;
+    const char letter = note[0];
+    const char number = note[strlen(note) - 1];
+    const int distance = getDistanceFromA(letter);
     float semiTone;
 
-
-    if (noteLength == 3)
+    if (strlen(note) == 3)
     {
         char modifier = note[strlen(note) - 2];
 
@@ -52,10 +48,10 @@ int frequency(string note)
     else
     {
         semiTone = getSemiTone(distance);
-    }
+    } 
 
     float freqA = getFrequenciesOfNoteA(number - '0');
-    frequency = freqA * semiTone;
+    float frequency = freqA * semiTone;
 
     return (int)round(frequency);
 }
@@ -78,26 +74,26 @@ int getDistanceFromA(char letter)
     int distance;
     switch (letter)
     {
-    case 'B':
-        distance = 2;
-        break;
-    case 'G':
-        distance = -2;
-        break;
-    case 'F':
-        distance = -4;
-        break;
-    case 'E':
-        distance = -5;
-        break;
-    case 'D':
-        distance = -7;
-        break;
-    case 'C':
-        distance = -9;
-        break;
-    default:
-        distance = 0;
+        case 'B':
+            distance = 2;
+            break;
+        case 'G':
+            distance = -2;
+            break;
+        case 'F':
+            distance = -4;
+            break;
+        case 'E':
+            distance = -5;
+            break;
+        case 'D':
+            distance = -7;
+            break;
+        case 'C':
+            distance = -9;
+            break;
+        default:
+            distance = 0;
     }
     return distance;
 }
