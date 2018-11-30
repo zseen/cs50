@@ -6,29 +6,15 @@
 #define _XOPEN_SOURCE
 
 
-char* generateInitialPW(int size)
+char* generateSameLetterPW(int size, char letter)
 {
     char* initialPW = (char*)malloc((size + 1) * sizeof(char));
-
     for (int i = 0; i < size; i++)
     {
-        initialPW[i] = 'A';
+        initialPW[i] = letter;
     }
     initialPW[size] = '\0';
     return initialPW;
-}
-
-char* generateFinalPW(int size)
-{
-    char* finalPW = (char*)malloc((size + 1) * sizeof(char));
-
-    for (int i = 0; i < size; i++)
-    {
-        finalPW[i] = 'z';
-    }
-
-    finalPW[size] = '\0';
-    return finalPW;
 }
 
 void getLexicographicalNextString(char* c)
@@ -43,7 +29,6 @@ void getLexicographicalNextString(char* c)
         else if (c[i] == 'z')
         {
             c[i] = 'A';
-
         }
         else
         {
@@ -62,13 +47,12 @@ int main(int argc, char* argv[])
     }
 
     char* targetHash = argv[1];
-    char password[6] = { '\0' };
     char salt[3] = { targetHash[0], targetHash[1], '\0' };
 
     for (int passwordLength = 1; passwordLength < 6; passwordLength++)
     {
-        char* currentPW = generateInitialPW(passwordLength);
-        char* finalPW = generateFinalPW(passwordLength);
+        char* currentPW = generateSameLetterPW(passwordLength, 'A');
+        char* finalPW = generateSameLetterPW(passwordLength, 'z');
 
         while (true)
         {         
@@ -82,8 +66,9 @@ int main(int argc, char* argv[])
             {
                 printf("%s\n", currentPW);
                 return 0;
-            }                   
-                getLexicographicalNextString(currentPW);            
+            }  
+
+            getLexicographicalNextString(currentPW);            
         }
         free(currentPW);
         free(finalPW);
