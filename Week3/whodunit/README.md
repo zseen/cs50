@@ -1,7 +1,8 @@
 # Questions
 
 ## What's `stdint.h`?
-Use it if you would like your program to work universally in any system environments, because otherwise you cannot be sure that the actual size of int will always be 32 bits, and long long will always be 64 bits. If you inclue this header, it contains the definition of new integer types, like it guarantees that an integer type int32_t has 32 bits anywhere.
+It is a header that contains the definition of new integer types, like it guarantees that an integer type int32_t has 32 bits anywhere.
+Use it if you would like your program to work universally in any system environments, because otherwise you cannot be sure that the actual size of int will always be 32 bits, and long long will always be 64 bits.
 
 
 ## What's the point of using `uint8_t`, `uint32_t`, `int32_t`, and `uint16_t` in a program?
@@ -16,16 +17,16 @@ LONG: 4 bytes
 
 
 ## What (in ASCII, decimal, or hexadecimal) must the first two bytes of any BMP file be? Leading bytes used to identify file formats (with high probability) are generally called "magic numbers."
-ASCII: the first 2 bytes of the BMP file format are the character "B" then the character "M" that identify the file type.
+ASCII: the first 2 bytes of the BMP file format are the characters "B" and "M" that identify the file type.
 
 
 ## What's the difference between `bfSize` and `biSize`?
-- bfSize = biSizeImage + sizeof(BITMAPFILEHEADER(14)) + sizeof(BITMAPINFOHEADER(40)) ->  is the full file size of the bitmap image
+- bfSize = biSizeImage + sizeof(BITMAPFILEHEADER(14)) + sizeof(BITMAPINFOHEADER(40)) ->  it is the full file size of the bitmap image
 - biSize = sizeof(BITMAPINFOHEADER) = 40 bytes
 
 
 ## What does it mean if `biHeight` is negative?
-The bitmap is a top-down DIB and its origin is the upper-left corner.
+The bitmap is a top-down DIB (device-independent bitmap) and its origin is the upper-left corner.
 
 
 ## What field in `BITMAPINFOHEADER` specifies the BMP's color depth (i.e., bits per pixel)?
@@ -48,11 +49,11 @@ int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
 
 ## What does `fseek` do?
-It is used to move file pointer in a given file to a specific position.
+It sets the file position of the stream pointer to a new position (by the given offset).
 
 
 ## What is `SEEK_CUR`?
-It moves a file pointer position to a given location.
+It moves a file pointer position to a given location and the new file position will be the current position plus offset (in bytes).
 
 
 ## Whodunit?
