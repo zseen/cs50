@@ -3,6 +3,7 @@
 #include <cs50.h>
 #include "bmp.h"
 
+
 int main(int argc, char *argv[])
 {
     if (argc != 3)
@@ -45,7 +46,6 @@ int main(int argc, char *argv[])
     }
 
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
-
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
     int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
@@ -55,7 +55,6 @@ int main(int argc, char *argv[])
         for (int j = 0; j < bi.biWidth; j++)
         {
             RGBTRIPLE triple;
-
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
             if (triple.rgbtRed == 0xff)
@@ -77,7 +76,6 @@ int main(int argc, char *argv[])
     }
 
     fclose(inptr);
-
     fclose(outptr);
 
     return 0;
