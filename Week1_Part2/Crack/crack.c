@@ -6,15 +6,27 @@
 #define _XOPEN_SOURCE
 
 
-char* generateSameLetterPW(int size, char letter)
+char* generateSameLetterString(int size, char letter)
 {
-    char* initialPW = (char*)malloc((size + 1) * sizeof(char));
+    char* sameLetterString = (char*)malloc((size + 1) * sizeof(char));
     for (int i = 0; i < size; i++)
     {
-        initialPW[i] = letter;
+        sameLetterString[i] = letter;
     }
-    initialPW[size] = '\0';
-    return initialPW;
+    sameLetterString[size] = '\0';
+    return sameLetterString;
+}
+
+char* generateSameLetterStringWith_A(int size)
+{  
+    char* onlyLetter_A = generateSameLetterString(size, 'A');
+    return onlyLetter_A;
+}
+
+char* generateSameLetterStringWith_z(int size)
+{ 
+    char* onlyLetter_z = generateSameLetterString(size, 'z');
+    return onlyLetter_z;
 }
 
 void getLexicographicalNextString(char* c)
@@ -51,8 +63,8 @@ int main(int argc, char* argv[])
 
     for (int passwordLength = 1; passwordLength < 6; passwordLength++)
     {
-        char* currentPW = generateSameLetterPW(passwordLength, 'A');
-        char* finalPW = generateSameLetterPW(passwordLength, 'z');
+        char* currentPW = generateSameLetterStringWith_A(passwordLength);
+        char* finalPW = generateSameLetterStringWith_z(passwordLength);
 
         while (true)
         {         
