@@ -50,22 +50,22 @@ int frequency(string note)
         semiTone = getSemiTone(distance);
     } 
 
-    float freqA = getFrequenciesOfNoteA(number - '0');
-    float frequency = freqA * semiTone;
+    const float freqA = getFrequenciesOfNoteA(number - '0');
+    const float frequency = freqA * semiTone;
 
     return (int)round(frequency);
 }
 
 float getFrequenciesOfNoteA(int octave)
 {
-    int octaveFromA4 = octave - 4;
-    float freq = (pow(2, octaveFromA4) * A4_FREQUENCY);
+    const int octaveFromA4 = octave - 4;
+    const float freq = (pow(2, octaveFromA4) * A4_FREQUENCY);
     return freq;
 }
 
 float getSemiTone(int distance)
 {
-    float semiTone = pow(2, ((distance) / NUM_SEMITONES_IN_OCTAVE));
+    const float semiTone = pow(2, ((distance) / NUM_SEMITONES_IN_OCTAVE));
     return semiTone;
 }
 
