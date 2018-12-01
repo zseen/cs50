@@ -56,5 +56,4 @@ It moves a file pointer position to a given location.
 
 
 ## Whodunit?
-
-TODO
+It was Professor Plum with the candlestick in the library.

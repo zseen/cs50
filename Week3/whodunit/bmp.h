@@ -1,6 +1,7 @@
 // BMP-related data types based on Microsoft's own
 
 #include <stdint.h>
+#include <cs50.h>
 
 // aliases for C/C++ primitive data types
 // https://msdn.microsoft.com/en-us/library/cc230309.aspx
