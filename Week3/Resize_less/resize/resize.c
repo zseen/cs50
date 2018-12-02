@@ -8,22 +8,29 @@
 int main(int argc, char *argv[])
 {
     // ensure proper usage
-    if (argc != 3)
+    if (argc != 4)
     {
-        fprintf(stderr, "Usage: copy infile outfile\n");
+        fprintf(stderr, "Usage: copy size infile outfile\n");
         return 1;
     }
 
     // remember filenames
-    char *infile = argv[1];
-    char *outfile = argv[2];
+    int size = atoi(argv[1]);
+    char *infile = argv[2];
+    char *outfile = argv[3];
+
+    if (size < 1 || size > 100)
+    {
+        fprintf(stderr, "Size should be more than 1 and no more than 100");
+        return 1;
+    }
 
     // open input file
     FILE *inptr = fopen(infile, "r");
     if (inptr == NULL)
     {
         fprintf(stderr, "Could not open %s.\n", infile);
-        return 2;
+        return 1;
     }
 
     // open output file
@@ -32,7 +39,7 @@ int main(int argc, char *argv[])
     {
         fclose(inptr);
         fprintf(stderr, "Could not create %s.\n", outfile);
-        return 3;
+        return 1;
     }
 
     // read infile's BITMAPFILEHEADER
@@ -53,6 +60,19 @@ int main(int argc, char *argv[])
         return 4;
     }
 
+
+    int in_width = bi.biWidth;
+    int in_height = bi.Height;
+    int in_padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
+
+    bi.biWidth *= size;
+    bi.biHeight *= size;
+    int outPadding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    bi.biSizeImage = ((sizeof(RGBTRIPLE) * bi.biWidth) + outPadding) * abs(bi.biHeight);
+    bf.bfSize = bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
+
+
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
@@ -62,20 +82,27 @@ int main(int argc, char *argv[])
     // determine padding for scanlines
     int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
+
+    
     // iterate over infile's scanlines
-    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
+    for (int i = 0, biHeight = abs(in_height); i < biHeight; i++)
     {
         // iterate over pixels in scanline
-        for (int j = 0; j < bi.biWidth; j++)
+        for (int j = 0; j < in_width; j++)
         {
             // temporary storage
             RGBTRIPLE triple;
 
+
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            for (int m = 0; m < size; ++m)
+            {
+                // write RGB triple to outfile
+                fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            }
+           
         }
 
         // skip over padding, if any
