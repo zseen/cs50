@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
 
     int in_width = bi.biWidth;
-    int in_height = bi.Height;
+    int in_height = bi.biHeight;
     int in_padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
 
     bi.biWidth *= size;
@@ -97,11 +97,23 @@ int main(int argc, char *argv[])
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            for (int m = 0; m < size; ++m)
+            for (int n = 0; n < size; ++n)
             {
-                // write RGB triple to outfile
-                fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+                //j * size
+                for (int m = 0; m < size; ++m)
+                {
+                    // write RGB triple to outfile
+                    fwrite(&triple * size, sizeof(RGBTRIPLE), 1, outptr);
+                }
             }
+            for (int k = 0; k < outPadding; k++)
+            {
+                fputc(0x00, outptr);
+            }
+               
+
+
+            
            
         }
 
