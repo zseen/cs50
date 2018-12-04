@@ -18,7 +18,7 @@ typedef struct
     WORD bfReserved1;
     WORD bfReserved2;
     DWORD bfOffBits;
-} __attribute__((__packed__))
+} 
 BITMAPFILEHEADER;
 
 // information about the dimensions and color format
@@ -36,7 +36,7 @@ typedef struct
     LONG biYPelsPerMeter;
     DWORD biClrUsed;
     DWORD biClrImportant;
-} __attribute__((__packed__))
+}
 BITMAPINFOHEADER;
 
 // relative intensities of red, green, and blue
@@ -46,5 +46,5 @@ typedef struct
     BYTE rgbtBlue;
     BYTE rgbtGreen;
     BYTE rgbtRed;
-} __attribute__((__packed__))
+}
 RGBTRIPLE;
