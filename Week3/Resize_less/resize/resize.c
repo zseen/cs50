@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
     int padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
 
 
-    //RGBTRIPLE* arrayRGBTRIPLE = malloc(size * in_width);
+    RGBTRIPLE* arrayRGBTRIPLE = malloc(size * in_width);
 
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(in_height); i < biHeight; i++)
@@ -105,20 +105,26 @@ int main(int argc, char *argv[])
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-
-            for (int n = 0; n < size; ++n)
+            for (int m = 0; m < size; ++m)
             {
-                // write RGB triple to outfile
-                fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-
-
-                for (int k = 0; k < outPadding; k++)
-                {
-
-                    fputc(0x00, outptr);
-                }
+                arrayRGBTRIPLE[m + j] = triple;
             }
 
+        }
+
+
+        for (int n = 0; n < size; ++n)
+        {
+            // write RGB triple to outfile
+            fwrite(&arrayRGBTRIPLE[n], sizeof(RGBTRIPLE), 1, outptr);
+
+            for (int k = 0; k < outPadding; k++)
+            {
+
+                fputc(0x00, outptr);
+            }
+            
+            
         }
 
         // skip over padding, if any
