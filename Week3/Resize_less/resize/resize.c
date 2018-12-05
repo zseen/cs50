@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
     //printf("%lu\n", sizeof(BITMAPINFOHEADER));
     //printf("%d\n", bf.bfSize);
 
-
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
@@ -87,54 +86,31 @@ int main(int argc, char *argv[])
     // determine padding for scanlines
     int padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
 
-
-    RGBTRIPLE* arrayRGBTRIPLE = malloc(size * in_width);
-
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(in_height); i < biHeight; i++)
     {
-
+        RGBTRIPLE arrayRGBTRIPLE[bi.biWidth];
         // iterate over pixels in scanline
-        for (int j = 0; j < in_width * size; j++)
+        for (int j = 0; j < in_width; j++)
         {
-
-            // temporary storage
             RGBTRIPLE triple;
 
-
-            // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            for (int m = 0; m < size; ++m)
+            for (int k = 0; k < size; k++)
             {
-                arrayRGBTRIPLE[m + j] = triple;
+                arrayRGBTRIPLE[k] = triple;
             }
-
         }
 
-
-        for (int n = 0; n < size; ++n)
+        for (int m = 0; m < size; m++)
         {
-            // write RGB triple to outfile
-            fwrite(&arrayRGBTRIPLE[n], sizeof(RGBTRIPLE), 1, outptr);
-
-            for (int k = 0; k < outPadding; k++)
+            fwrite(&arrayRGBTRIPLE, sizeof(RGBTRIPLE), 1, outptr);
+            // write outfile padding
+            for (int o = 0; o < outPadding; o++)
             {
-
                 fputc(0x00, outptr);
             }
-            
-            
-        }
-
-        // skip over padding, if any
-        fseek(inptr, padding, SEEK_CUR);
-
-
-        // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
-        {
-            fputc(0x00, outptr);
         }
     }
 
