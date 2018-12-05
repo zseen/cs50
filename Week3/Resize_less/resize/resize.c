@@ -57,16 +57,15 @@ int main(int argc, char *argv[])
         fclose(outptr);
         fclose(inptr);
         fprintf(stderr, "Unsupported file format.\n");
-        return 4;
+        return 1;
     }
-
 
     int in_width = bi.biWidth;
     int in_height = bi.biHeight;
     int in_padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
     bi.biSizeImage = ((sizeof(RGBTRIPLE) * bi.biWidth) + in_padding) * abs(bi.biHeight);
     bf.bfSize = bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    //printf("%d\n", bf.bfSize);
+
 
     bi.biWidth *= size;
     bi.biHeight *= size;
@@ -74,8 +73,7 @@ int main(int argc, char *argv[])
 
     bi.biSizeImage = ((sizeof(RGBTRIPLE) * bi.biWidth) + outPadding) * abs(bi.biHeight);
     bf.bfSize = bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    //printf("%lu\n", sizeof(BITMAPINFOHEADER));
-    //printf("%d\n", bf.bfSize);
+
 
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -86,10 +84,15 @@ int main(int argc, char *argv[])
     // determine padding for scanlines
     int padding = (4 - (in_width * sizeof(RGBTRIPLE)) % 4) % 4;
 
+
+    RGBTRIPLE arrayRGBTRIPLE[bi.biWidth];
+
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(in_height); i < biHeight; i++)
     {
-        RGBTRIPLE arrayRGBTRIPLE[bi.biWidth];
+
+        //for (int v = 0; v < size; v++)
+
         // iterate over pixels in scanline
         for (int j = 0; j < in_width; j++)
         {
@@ -97,21 +100,35 @@ int main(int argc, char *argv[])
 
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            for (int k = 0; k < size; k++)
+            arrayRGBTRIPLE[j] = triple;
+
+            for (int m = 0; m < size; m++)
             {
-                arrayRGBTRIPLE[k] = triple;
+                //fwrite(&arrayRGBTRIPLE, sizeof(RGBTRIPLE), 1, outptr);
+                fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+                // write outfile padding
+                //for (int o = 0; o < outPadding; o++)
+                //{
+                    //fputc(0x00, outptr);
+                //}
             }
         }
 
-        for (int m = 0; m < size; m++)
+
+        for (int d = 0; d < size - 1; d++)
         {
-            fwrite(&arrayRGBTRIPLE, sizeof(RGBTRIPLE), 1, outptr);
-            // write outfile padding
-            for (int o = 0; o < outPadding; o++)
+            for (int b = 0; b < in_width; b++)
             {
-                fputc(0x00, outptr);
+                for (int c = 0; c < size; c++)
+                {
+
+                    fwrite(&arrayRGBTRIPLE[b], sizeof(RGBTRIPLE), 1, outptr);
+                }
+
             }
         }
+
+
     }
 
     // close infile
