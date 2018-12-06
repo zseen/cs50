@@ -86,14 +86,18 @@ int main(int argc, char *argv[])
             fputc(0x00, outptr);
         }
 
-        for (int d = 0; d < size - 1; d++)
+        for (int a = 0; a < size - 1; ++a)
         {
-            for (int b = 0; b < inWidth; b++)
+            for (int b = 0; b < inWidth; ++b)
             {
-                for (int c = 0; c < size; c++)
+                for (int c = 0; c < size; ++c)
                 {
                     fwrite(&arrayRGBTRIPLE[b], sizeof(RGBTRIPLE), 1, outptr);
                 }
+            }
+            for (int o = 0; o < outPadding; o++)
+            {
+                fputc(0x00, outptr);
             }
         }
     }
