@@ -3,6 +3,43 @@
 
 #include "bmp.h"
 
+
+void writePadding(int outPadding, FILE* outptr)
+{
+    for (int paddingNeeded = 0; paddingNeeded < outPadding; paddingNeeded++)
+    {
+        fputc(0x00, outptr);
+    }
+}
+
+void writeLineVertically(int imageResizeFactor, int inWidth, RGBTRIPLE* arrayRGBTRIPLE, int size, FILE* outptr, int outPadding)
+{
+    for (int lineToAdd = 0; lineToAdd < imageResizeFactor - 1; ++lineToAdd)
+    {
+        for (int pixelPosition = 0; pixelPosition < inWidth; ++pixelPosition)
+        {
+            for (int lineLength = 0; lineLength < imageResizeFactor; ++lineLength)
+            {
+                fwrite(&arrayRGBTRIPLE[pixelPosition], size, 1, outptr);
+            }
+        }
+
+        writePadding(outPadding, outptr);
+    }
+}
+
+void writeLineHorizontallyWithoutPadding(RGBTRIPLE* arrayRGBTRIPLE, int imageResizeFactor, int pixelPosition, FILE* inptr, FILE* outptr)
+{
+    RGBTRIPLE triple;
+    fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+    arrayRGBTRIPLE[pixelPosition] = triple;
+
+    for (int lineLength = 0; lineLength < imageResizeFactor; lineLength++)
+    {
+        fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     if (argc != 4)
@@ -11,11 +48,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int size = atoi(argv[1]);
+    int imageResizeFactor = atoi(argv[1]);
     char *infile = argv[2];
     char *outfile = argv[3];
 
-    if (size < 1 || size > 100)
+    if (imageResizeFactor < 1 || imageResizeFactor > 100)
     {
         fprintf(stderr, "Size should be more than 1 and no more than 100");
         return 1;
@@ -55,51 +92,28 @@ int main(int argc, char *argv[])
     int inHeight = bi.biHeight;
     int inPadding = (4 - (inWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
-    bi.biWidth *= size;
-    bi.biHeight *= size;
+    bi.biWidth *= imageResizeFactor;
+    bi.biHeight *= imageResizeFactor;
     int outPadding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
     bi.biSizeImage = ((sizeof(RGBTRIPLE) * bi.biWidth) + outPadding) * abs(bi.biHeight);
     bf.bfSize = bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
-  
+
     RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((bi.biWidth) * sizeof(RGBTRIPLE));
 
     for (int i = 0, biHeight = abs(inHeight); i < biHeight; i++)
     {
         for (int j = 0; j < inWidth; j++)
         {
-            RGBTRIPLE triple;
-            fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-            arrayRGBTRIPLE[j] = triple;
-
-            for (int m = 0; m < size; m++)
-            {
-                fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-            }
+            writeLineHorizontallyWithoutPadding(arrayRGBTRIPLE, imageResizeFactor, j, inptr, outptr);
         }
 
         fseek(inptr, inPadding, SEEK_CUR);
-        for (int o = 0; o < outPadding; o++)
-        {
-            fputc(0x00, outptr);
-        }
+        writePadding(outPadding, outptr);
 
-        for (int a = 0; a < size - 1; ++a)
-        {
-            for (int b = 0; b < inWidth; ++b)
-            {
-                for (int c = 0; c < size; ++c)
-                {
-                    fwrite(&arrayRGBTRIPLE[b], sizeof(RGBTRIPLE), 1, outptr);
-                }
-            }
-            for (int o = 0; o < outPadding; o++)
-            {
-                fputc(0x00, outptr);
-            }
-        }
+        writeLineVertically(imageResizeFactor, inWidth, arrayRGBTRIPLE, sizeof(RGBTRIPLE), outptr, outPadding);
     }
 
     free(arrayRGBTRIPLE);
@@ -109,3 +123,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
