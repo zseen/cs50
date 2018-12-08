@@ -12,20 +12,18 @@ void writePadding(int outPadding, FILE* outptr)
     }
 }
 
-void writeLineVertically(int imageResizeFactor, int inWidth, RGBTRIPLE* arrayRGBTRIPLE, int size, FILE* outptr, int outPadding)
+void writeEnlargedLine(int imageResizeFactor, int inWidth, RGBTRIPLE* arrayRGBTRIPLE, int size, FILE* outptr)
 {
     for (int pixelPosition = 0; pixelPosition < inWidth; ++pixelPosition)
     {
         for (int lineLength = 0; lineLength < imageResizeFactor; ++lineLength)
         {
             fwrite(&arrayRGBTRIPLE[pixelPosition], size, 1, outptr);
-        }
-    }
-
-    writePadding(outPadding, outptr);  
+        }      
+    }    
 }
 
-RGBTRIPLE* putPixelInEnlargedLine(int imageResizeFactor, int inWidth, FILE* inptr)
+RGBTRIPLE* readLineIntoArray(int imageResizeFactor, int inWidth, FILE* inptr)
 {
     RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((inWidth * imageResizeFactor) * sizeof(RGBTRIPLE));
 
@@ -100,19 +98,18 @@ int main(int argc, char *argv[])
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    
+    //RGBTRIPLE* arrayRGBTRIPLE;
 
     for (int i = 0, biHeight = abs(inHeight); i < biHeight; i++)
     {
-        RGBTRIPLE* pixelsArray = putPixelInEnlargedLine(imageResizeFactor, inWidth, inptr);
-        printf("%lu\n", sizeof(pixelsArray));
-        
+        RGBTRIPLE* pixelsArray = readLineIntoArray(imageResizeFactor, inWidth, inptr);
+        //printf("%lu\n", sizeof(pixelsArray));
         fseek(inptr, inPadding, SEEK_CUR);
-        writePadding(outPadding, outptr);
 
         for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
         {
-            writeLineVertically(imageResizeFactor, inWidth, pixelsArray, sizeof(RGBTRIPLE), outptr, outPadding);
+            writeEnlargedLine(imageResizeFactor, inWidth, pixelsArray, sizeof(RGBTRIPLE), outptr);
+            writePadding(outPadding, outptr);
         }
     }
 
