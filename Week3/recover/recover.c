@@ -21,14 +21,25 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    fread(buffer, 512, 1, inptr);
     char filename[8];
+    typedef uint8_t BYTE;
+    BYTE buffer[512];
+
+    while (true)
+    {
+        int block = fread(buffer, 512, 1, inptr);
+        while (block == 1)
+        {
+            buffer = 
+    
+    //fread(buffer, 512, 1, inptr);
+    
     sprintf(filename, "%03i.jpg", numberthPicture);
     FILE* img = fopen(filename, "w"); //filename = char array to store the result string
 
     fwrite(buffer, 512, 1, outfile); //FILE* to write to
 
-   int x = fread(buffer, 512, 1, inptr); // x should be equal to number, so 1, it should be a condition!!!
+   //int x = fread(buffer, 512, 1, inptr); // x should be equal to number, so 1, it should be a condition!!!
 
 
 
