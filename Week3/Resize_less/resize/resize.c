@@ -14,30 +14,29 @@ void writePadding(int outPadding, FILE* outptr)
 
 void writeLineVertically(int imageResizeFactor, int inWidth, RGBTRIPLE* arrayRGBTRIPLE, int size, FILE* outptr, int outPadding)
 {
-    for (int lineToAdd = 0; lineToAdd < imageResizeFactor - 1; ++lineToAdd)
+    for (int pixelPosition = 0; pixelPosition < inWidth; ++pixelPosition)
     {
-        for (int pixelPosition = 0; pixelPosition < inWidth; ++pixelPosition)
+        for (int lineLength = 0; lineLength < imageResizeFactor; ++lineLength)
         {
-            for (int lineLength = 0; lineLength < imageResizeFactor; ++lineLength)
-            {
-                fwrite(&arrayRGBTRIPLE[pixelPosition], size, 1, outptr);
-            }
+            fwrite(&arrayRGBTRIPLE[pixelPosition], size, 1, outptr);
         }
-
-        writePadding(outPadding, outptr);
     }
+
+    writePadding(outPadding, outptr);  
 }
 
-void writeLineHorizontallyWithoutPadding(RGBTRIPLE* arrayRGBTRIPLE, int imageResizeFactor, int pixelPosition, FILE* inptr, FILE* outptr)
+RGBTRIPLE* putPixelInEnlargedLine(int imageResizeFactor, int inWidth, FILE* inptr)
 {
-    RGBTRIPLE triple;
-    fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-    arrayRGBTRIPLE[pixelPosition] = triple;
+    RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((inWidth * imageResizeFactor) * sizeof(RGBTRIPLE));
 
-    for (int lineLength = 0; lineLength < imageResizeFactor; lineLength++)
+    for (int j = 0; j < inWidth; j++)
     {
-        fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+        RGBTRIPLE triple;
+        fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+        arrayRGBTRIPLE[j] = triple; 
     }
+   
+    return arrayRGBTRIPLE;
 }
 
 int main(int argc, char *argv[])
@@ -101,22 +100,23 @@ int main(int argc, char *argv[])
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((bi.biWidth) * sizeof(RGBTRIPLE));
+    
 
     for (int i = 0, biHeight = abs(inHeight); i < biHeight; i++)
     {
-        for (int j = 0; j < inWidth; j++)
-        {
-            writeLineHorizontallyWithoutPadding(arrayRGBTRIPLE, imageResizeFactor, j, inptr, outptr);
-        }
-
+        RGBTRIPLE* pixelsArray = putPixelInEnlargedLine(imageResizeFactor, inWidth, inptr);
+        printf("%lu\n", sizeof(pixelsArray));
+        
         fseek(inptr, inPadding, SEEK_CUR);
         writePadding(outPadding, outptr);
 
-        writeLineVertically(imageResizeFactor, inWidth, arrayRGBTRIPLE, sizeof(RGBTRIPLE), outptr, outPadding);
+        for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
+        {
+            writeLineVertically(imageResizeFactor, inWidth, pixelsArray, sizeof(RGBTRIPLE), outptr, outPadding);
+        }
     }
 
-    free(arrayRGBTRIPLE);
+    //free(arrayRGBTRIPLE);
 
     fclose(inptr);
     fclose(outptr);
