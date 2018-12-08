@@ -27,11 +27,11 @@ RGBTRIPLE* readLineIntoArray(int imageResizeFactor, int inWidth, FILE* inptr)
 {
     RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((inWidth * imageResizeFactor) * sizeof(RGBTRIPLE));
 
-    for (int j = 0; j < inWidth; j++)
+    for (int rowIndex = 0; rowIndex < inWidth; rowIndex++)
     {
         RGBTRIPLE triple;
         fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-        arrayRGBTRIPLE[j] = triple; 
+        arrayRGBTRIPLE[rowIndex] = triple; 
     }
    
     return arrayRGBTRIPLE;
@@ -98,12 +98,9 @@ int main(int argc, char *argv[])
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    //RGBTRIPLE* arrayRGBTRIPLE;
-
-    for (int i = 0, biHeight = abs(inHeight); i < biHeight; i++)
+    for (int columnIndex = 0, biHeight = abs(inHeight); columnIndex < biHeight; columnIndex++)
     {
         RGBTRIPLE* pixelsArray = readLineIntoArray(imageResizeFactor, inWidth, inptr);
-        //printf("%lu\n", sizeof(pixelsArray));
         fseek(inptr, inPadding, SEEK_CUR);
 
         for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
@@ -112,8 +109,6 @@ int main(int argc, char *argv[])
             writePadding(outPadding, outptr);
         }
     }
-
-    //free(arrayRGBTRIPLE);
 
     fclose(inptr);
     fclose(outptr);
