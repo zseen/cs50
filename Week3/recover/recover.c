@@ -3,7 +3,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef uint8_t BYTE;
 
+FILE* addBufferToPicture(char* filename, int pictureNum, FILE* outptr, BYTE* buffer)
+{
+    sprintf(filename, "%03i.jpg", pictureNum);
+    outptr = fopen(filename, "wb");
+    fwrite(buffer, 512, 1, outptr);
+    return outptr;
+}
 
 int main(int argc, char *argv[])
 {
@@ -22,8 +30,8 @@ int main(int argc, char *argv[])
     }
 
     char filename[8];
-    FILE* outptr;
-    typedef uint8_t BYTE;
+    FILE* outptr = NULL;
+    
     BYTE buffer[512];
     int pictureNum = 0;
 
@@ -33,49 +41,22 @@ int main(int argc, char *argv[])
         {
             if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
             {
-
-                //pictureNum += 1;
-                sprintf(filename, "%03i.jpg", pictureNum);
-                outptr = fopen(filename, "wb");
-                fwrite(buffer, 512, 1, outptr);
+                outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
             }
         }
-
         else if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
         {
             fclose(outptr);
             pictureNum += 1;
-            sprintf(filename, "%03i.jpg", pictureNum);
-            outptr = fopen(filename, "wb");
-            fwrite(buffer, 512, 1, outptr);
-
+            outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
         }
-
-
         else
         {
-            //outptr = fopen(filename, "wb");
             fwrite(buffer, 512, 1, outptr);
         }
     }
 
-
-
-    //fread(buffer, 512, 1, inptr);
-
-
-    //FILE* img = fopen(filename, "w"); //filename = char array to store the result string
-
-    //fwrite(buffer, 512, 1, outfile); //FILE* to write to
-
-    //int x = fread(buffer, 512, 1, inptr); // x should be equal to number, so 1, it should be a condition!!!
-
-        //free(buffer);
     fclose(outptr);
     fclose(inptr);
     return 0;
-
-
-
-
 }
