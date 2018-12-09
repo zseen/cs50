@@ -3,12 +3,13 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
 typedef uint8_t BYTE;
 const int BUFFER_SIZE = 512;
 
-bool isConditionMet(BYTE* buffer)
+bool isConditionMet(BYTE* bytes)
 {
-    if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
+    if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff && (bytes[3] & 0xf0) == 0xe0)
     {
         return true;
     }
@@ -16,11 +17,11 @@ bool isConditionMet(BYTE* buffer)
     return false;
 }
 
-FILE* addBufferToPicture(char* filename, int pictureNum, FILE* outptr, BYTE* buffer)
+FILE* addBytesToFile(BYTE* bytes, FILE* outptr, char* filename, int fileNum)
 {
-    sprintf(filename, "%03i.jpg", pictureNum);
+    sprintf(filename, "%03i.jpg", fileNum);
     outptr = fopen(filename, "wb");
-    fwrite(buffer, BUFFER_SIZE, 1, outptr);
+    fwrite(bytes, BUFFER_SIZE, 1, outptr);
     return outptr;
 }
 
@@ -43,7 +44,6 @@ int main(int argc, char *argv[])
     char filename[8];
     FILE* outptr = NULL;
     BYTE buffer[512];
-    int bufferSize = 512;
     int pictureNum = 0;
 
     while (fread(buffer, BUFFER_SIZE, 1, inptr) == 1)
@@ -52,14 +52,14 @@ int main(int argc, char *argv[])
         {
             if (isConditionMet(buffer))
             {
-                outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
+                outptr = addBytesToFile(buffer, outptr, filename, pictureNum);
             }
         }
         else if (isConditionMet(buffer))
         {
             fclose(outptr);
             pictureNum += 1;
-            outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
+            outptr = addBytesToFile(buffer, outptr, filename, pictureNum);
         }
         else
         {
