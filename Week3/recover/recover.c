@@ -5,6 +5,16 @@
 
 typedef uint8_t BYTE;
 
+bool isConditionMet(BYTE* buffer)
+{
+    if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 FILE* addBufferToPicture(char* filename, int pictureNum, FILE* outptr, BYTE* buffer)
 {
     sprintf(filename, "%03i.jpg", pictureNum);
@@ -39,12 +49,12 @@ int main(int argc, char *argv[])
     {
         if (outptr == NULL)
         {
-            if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
+            if (isConditionMet(buffer))
             {
                 outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
             }
         }
-        else if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff && (buffer[3] & 0xf0) == 0xe0)
+        else if (isConditionMet(buffer))
         {
             fclose(outptr);
             pictureNum += 1;
