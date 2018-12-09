@@ -15,11 +15,11 @@ bool isConditionMet(BYTE* buffer)
     return false;
 }
 
-FILE* addBufferToPicture(char* filename, int pictureNum, FILE* outptr, BYTE* buffer)
+FILE* addBufferToPicture(char* filename, int pictureNum, FILE* outptr, BYTE* buffer, int bufferSize)
 {
     sprintf(filename, "%03i.jpg", pictureNum);
     outptr = fopen(filename, "wb");
-    fwrite(buffer, 512, 1, outptr);
+    fwrite(buffer, bufferSize, 1, outptr);
     return outptr;
 }
 
@@ -41,28 +41,28 @@ int main(int argc, char *argv[])
 
     char filename[8];
     FILE* outptr = NULL;
-    
     BYTE buffer[512];
+    int bufferSize = 512;
     int pictureNum = 0;
 
-    while (fread(buffer, 512, 1, inptr) == 1)
+    while (fread(buffer, sizeof(buffer), 1, inptr) == 1)
     {
         if (outptr == NULL)
         {
             if (isConditionMet(buffer))
             {
-                outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
+                outptr = addBufferToPicture(filename, pictureNum, outptr, buffer, bufferSize);
             }
         }
         else if (isConditionMet(buffer))
         {
             fclose(outptr);
             pictureNum += 1;
-            outptr = addBufferToPicture(filename, pictureNum, outptr, buffer);
+            outptr = addBufferToPicture(filename, pictureNum, outptr, buffer, bufferSize);
         }
         else
         {
-            fwrite(buffer, 512, 1, outptr);
+            fwrite(buffer, bufferSize, 1, outptr);
         }
     }
 
