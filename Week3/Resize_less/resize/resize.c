@@ -6,35 +6,40 @@
 
 void writePadding(int outPadding, FILE* outptr)
 {
-    for (int paddingNeeded = 0; paddingNeeded < outPadding; paddingNeeded++)
+    for (int paddingNeeded = 0; paddingNeeded < outPadding; ++paddingNeeded)
     {
         fputc(0x00, outptr);
     }
 }
 
-void writeEnlargedLine(int imageResizeFactor, int inWidth, RGBTRIPLE* arrayRGBTRIPLE, int size, FILE* outptr)
+void writeLine(int imageResizeFactor, RGBTRIPLE* pixelsArray, int pixelPosition, FILE* outptr)
+{
+    for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
+    {
+        fwrite(&pixelsArray[pixelPosition], sizeof(RGBTRIPLE), 1, outptr);
+    }
+}
+
+void writeEnlargedLine(int imageResizeFactor, int inWidth, RGBTRIPLE* pixelsArray, FILE* outptr)
 {
     for (int pixelPosition = 0; pixelPosition < inWidth; ++pixelPosition)
     {
-        for (int lineLength = 0; lineLength < imageResizeFactor; ++lineLength)
-        {
-            fwrite(&arrayRGBTRIPLE[pixelPosition], size, 1, outptr);
-        }      
+        writeLine(imageResizeFactor, pixelsArray, pixelPosition, outptr);
     }    
 }
 
 RGBTRIPLE* readLineIntoArray(int imageResizeFactor, int inWidth, FILE* inptr)
 {
-    RGBTRIPLE* arrayRGBTRIPLE = (RGBTRIPLE*)malloc((inWidth * imageResizeFactor) * sizeof(RGBTRIPLE));
+    RGBTRIPLE* pixelsArray = (RGBTRIPLE*)malloc(inWidth * sizeof(RGBTRIPLE));
 
-    for (int rowIndex = 0; rowIndex < inWidth; rowIndex++)
+    for (int columnIndex = 0; columnIndex < inWidth; ++columnIndex)
     {
         RGBTRIPLE triple;
         fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-        arrayRGBTRIPLE[rowIndex] = triple; 
+        pixelsArray[columnIndex] = triple;
     }
    
-    return arrayRGBTRIPLE;
+    return pixelsArray;
 }
 
 int main(int argc, char *argv[])
@@ -98,14 +103,14 @@ int main(int argc, char *argv[])
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    for (int columnIndex = 0, biHeight = abs(inHeight); columnIndex < biHeight; columnIndex++)
+    for (int rowIndex = 0, biHeight = abs(inHeight); rowIndex < biHeight; ++rowIndex)
     {
         RGBTRIPLE* pixelsArray = readLineIntoArray(imageResizeFactor, inWidth, inptr);
         fseek(inptr, inPadding, SEEK_CUR);
 
         for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
         {
-            writeEnlargedLine(imageResizeFactor, inWidth, pixelsArray, sizeof(RGBTRIPLE), outptr);
+            writeEnlargedLine(imageResizeFactor, inWidth, pixelsArray, outptr);
             writePadding(outPadding, outptr);
         }
     }
