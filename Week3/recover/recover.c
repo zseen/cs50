@@ -5,9 +5,8 @@
 
 
 typedef uint8_t BYTE;
-const int BUFFER_SIZE = 512;
 
-bool isConditionMet(BYTE* bytes)
+bool isItJPEGStart(BYTE* bytes)
 {
     if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff && (bytes[3] & 0xf0) == 0xe0)
     {
@@ -17,12 +16,9 @@ bool isConditionMet(BYTE* bytes)
     return false;
 }
 
-FILE* addBytesToFile(BYTE* bytes, FILE* outptr, char* filename, int fileNum)
+void nameJPEGFile(char* filename, int fileNum)
 {
-    sprintf(filename, "%03i.jpg", fileNum);
-    outptr = fopen(filename, "wb");
-    fwrite(bytes, BUFFER_SIZE, 1, outptr);
-    return outptr;
+    sprintf(filename, "%03i.jpg", fileNum);  
 }
 
 int main(int argc, char *argv[])
@@ -44,26 +40,28 @@ int main(int argc, char *argv[])
     char filename[8];
     FILE* outptr = NULL;
     BYTE buffer[512];
+    int bufferSize = 512;
     int pictureNum = 0;
 
-    while (fread(buffer, BUFFER_SIZE, 1, inptr) == 1)
+    while (fread(buffer, bufferSize, 1, inptr) == 1)
     {
-        if (outptr == NULL)
+        if (isItJPEGStart(buffer))
         {
-            if (isConditionMet(buffer))
+            if (outptr != NULL)
             {
-                outptr = addBytesToFile(buffer, outptr, filename, pictureNum);
+                fclose(outptr);  
             }
-        }
-        else if (isConditionMet(buffer))
-        {
-            fclose(outptr);
+            nameJPEGFile(filename, pictureNum);
+            outptr = fopen(filename, "wb");
+            fwrite(buffer, bufferSize, 1, outptr);
             pictureNum += 1;
-            outptr = addBytesToFile(buffer, outptr, filename, pictureNum);
         }
         else
         {
-            fwrite(buffer, BUFFER_SIZE, 1, outptr);
+            if (outptr != NULL)
+            {
+                fwrite(buffer, bufferSize, 1, outptr);
+            }           
         }
     }
 
