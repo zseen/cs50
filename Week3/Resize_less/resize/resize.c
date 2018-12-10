@@ -28,7 +28,7 @@ void writeEnlargedLine(int imageResizeFactor, int inWidth, RGBTRIPLE* pixelsArra
     }    
 }
 
-RGBTRIPLE* readLineIntoArray(int imageResizeFactor, int inWidth, FILE* inptr)
+RGBTRIPLE* readLineIntoArray(int inWidth, FILE* inptr)
 {
     RGBTRIPLE* pixelsArray = (RGBTRIPLE*)malloc(inWidth * sizeof(RGBTRIPLE));
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
     for (int rowIndex = 0, biHeight = abs(inHeight); rowIndex < biHeight; ++rowIndex)
     {
-        RGBTRIPLE* pixelsArray = readLineIntoArray(imageResizeFactor, inWidth, inptr);
+        RGBTRIPLE* pixelsArray = readLineIntoArray(inWidth, inptr);
         fseek(inptr, inPadding, SEEK_CUR);
 
         for (int repeat = 0; repeat < imageResizeFactor; ++repeat)
