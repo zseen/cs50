@@ -4,9 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
 #include <ctype.h>
 #include "dictionary.h"
+
+const int MAX_HASH = 27;
 
 // Returns true if word is in dictionary else false
 bool check(const char *word)
@@ -27,20 +28,41 @@ void linkTwoNodes(node* firstNode, node* secondNode)
     firstNode -> next = secondNode;
 }
 
-
-
-node* createHashTable()
+int getHashedValue(char* currentWord) /// maybe node.word?
 {
-    node* hashTable[27];
+    int sumOfChars = 0;
+    for (int charPosition = 0; charPosition < strlen(currentWord); charPosition++)
+    {
+        sumOfChars += currentWord[charPosition];
+    }
+
+    int hashedValue = sumOfChars % MAX_HASH;
 }
 
 
-void insertNodeIntoHashTable(node currentNode, node* hashTable)
+
+
+void insertNodeIntoHashTable(int hashedValue, char* currentWord)
 {
-    if (hashTable[]
+    node* currentNode = malloc(sizeof(node));
+    node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
+    int hashedValue = getHashedValue(currentWord);
+
+    node* head = hashTable[hashedValue];
+    node* temp = malloc(sizeof(node));
+
+    if (head == NULL)
+    {
+        head = currentNode;
+    }
+    else
+    {
+        
+        /// insert current node to front
+    }
 
 
-
+/*
         if hashtable[hash] is NULL
             make hashtable[hash] point to new_node
         else
@@ -48,7 +70,7 @@ void insertNodeIntoHashTable(node currentNode, node* hashTable)
             make temporary_node point to where hashtable[hash] is pointing
             while temporary_node not NULL
                 make temporary_node point to where temporary_node->next is pointing
-                make temporary_node->next point to new_node
+                make temporary_node->next point to new_node*/
 }
 
 // Loads dictionary into memory, returning true if successful else false
