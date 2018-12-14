@@ -10,22 +10,32 @@
 const int MAX_HASH = 27;
 
 // Returns true if word is in dictionary else false
-bool check(const char *word)
+bool check()//const char *word)
 {
     // TODO
     return false;
 }
 
-node* createNode(char* currentWord)
-{   
-    node* currentNode = malloc(sizeof(node));
-    strcpy(currentNode -> word, currentWord);
+
+bool isNodeCreated(node* currentNode)
+{
+    if (currentNode == NULL)
+    {
+        return false;
+    }
+    return true;
+}
+
+node* putWordInNode(char* currentWord, node* currentNode)
+{
+    currentNode->word = malloc(strlen(currentWord) + 1);
+    strcpy(currentNode->word, currentWord);
     return currentNode;
 }
 
 void linkTwoNodes(node* firstNode, node* secondNode)
 {
-    firstNode -> next = secondNode;
+    firstNode->next = secondNode;
 }
 
 int getHashedValue(char* currentWord) /// maybe node.word?
@@ -37,19 +47,14 @@ int getHashedValue(char* currentWord) /// maybe node.word?
     }
 
     int hashedValue = sumOfChars % MAX_HASH;
+    return hashedValue;
 }
 
 
-
-
-void insertNodeIntoHashTable(int hashedValue, char* currentWord)
+void insertNodeIntoHashTable(node* currentNode, node* hashTable)
 {
-    node* currentNode = malloc(sizeof(node));
-    node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
-    int hashedValue = getHashedValue(currentWord);
-
-    node* head = hashTable[hashedValue];
-    node* temp = malloc(sizeof(node));
+    int index = getHashedValue(currentNode->word);
+    node* head = &hashTable[index];
 
     if (head == NULL)
     {
@@ -57,27 +62,16 @@ void insertNodeIntoHashTable(int hashedValue, char* currentWord)
     }
     else
     {
-        
-        /// insert current node to front
+        currentNode->next = head;
+        head = currentNode;
     }
-
-
-/*
-        if hashtable[hash] is NULL
-            make hashtable[hash] point to new_node
-        else
-            create a temporary_node
-            make temporary_node point to where hashtable[hash] is pointing
-            while temporary_node not NULL
-                make temporary_node point to where temporary_node->next is pointing
-                make temporary_node->next point to new_node*/
 }
 
 // Loads dictionary into memory, returning true if successful else false
 bool load(const char *dictionary)
 {
-    FILE* file;
-    file = fopen(dictionary, "r");
+    FILE* file = fopen(dictionary, "r");
+
     if (file == NULL)
     {
         printf("Could not open dictionary");
@@ -85,8 +79,29 @@ bool load(const char *dictionary)
     }
 
 
+    char currentWord[LENGTH + 1];
+    node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
 
+    while (fscanf(file, "%s", currentWord) != EOF)
+    {
 
+        node* currentNode = malloc(sizeof(node));
+        if (isNodeCreated(currentNode))
+        {
+            node* readyNode = putWordInNode(currentWord, currentNode);
+            insertNodeIntoHashTable(readyNode, hashTable);
+            printf("%s", readyNode->word);
+        }
+        else
+        {
+            unload();
+            return false;
+        }
+    }
+
+    fclose(file);
+
+    return true;
 
     /*char word[LENGTH + 1] = {};
     int wordLength = strlen(word);
@@ -102,10 +117,9 @@ bool load(const char *dictionary)
 
 
     hash function (): */
-    
+
 
     // TODO
-    return false;
 }
 
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
@@ -119,5 +133,5 @@ unsigned int size(void)
 bool unload(void)
 {
     // TODO
-    return false;
+    return true;
 }
