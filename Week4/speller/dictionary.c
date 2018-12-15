@@ -47,6 +47,7 @@ bool check(const char *word)
     {
         if (strcmp(cursor->word, lowerCaseWord) == 0)
         {
+            free(lowerCaseWord);
             return true;
         }
         else
@@ -55,6 +56,7 @@ bool check(const char *word)
         }    
     }
 
+    free(lowerCaseWord);
     return false;
 }
 
