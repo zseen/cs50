@@ -32,6 +32,7 @@ int getHashedValue(const char* currentWord) /// maybe node.word?
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
+
     char* lowerCaseWord = (char*)malloc(sizeof(char) * strlen(word));
     for (int i = 0; i < strlen(word); ++i)
     {
@@ -155,5 +156,6 @@ bool unload(void)
         }
     }
 
+    free(hashTable);
     return true;
 }
