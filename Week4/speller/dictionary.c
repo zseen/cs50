@@ -148,6 +148,7 @@ bool unload(void)
         {
             node* temp = cursor;
             cursor = cursor->next;
+            free(temp->word);
             free(temp);
         }
     }
