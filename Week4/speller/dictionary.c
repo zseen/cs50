@@ -32,13 +32,20 @@ int getHashedValue(const char* currentWord) /// maybe node.word?
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-    int index = getHashedValue(word);
+    char* lowerCaseWord = (char*)malloc(sizeof(char) * strlen(word));
+    for (int i = 0; i < strlen(word); ++i)
+    {
+        lowerCaseWord[i] = tolower(word[i]);
+    }
+
+    lowerCaseWord[strlen(word)] = '\0';
+    int index = getHashedValue(lowerCaseWord);
     node* locationHead = hashTable[index];
     node* cursor = locationHead;
 
     while (cursor != NULL)
     {
-        if (strcasecmp(cursor->word, word) == 0)
+        if (strcmp(cursor->word, lowerCaseWord) == 0)
         {
             return true;
         }
@@ -133,6 +140,17 @@ unsigned int size(void)
 // Unloads dictionary from memory, returning true if successful else false
 bool unload(void)
 {
-    // TODO
+    for (int i = 0; i < MAX_HASH; ++i)
+    {
+        node* cursor = hashTable[i];
+
+        while (cursor != NULL)
+        {
+            node* temp = cursor;
+            cursor = cursor->next;
+            free(temp);
+        }
+    }
+
     return true;
 }
