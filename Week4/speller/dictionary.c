@@ -8,11 +8,29 @@
 #include "dictionary.h"
 
 const int MAX_HASH = 27;
+node* hashTable = NULL;
+
+void makeHashTable()
+{
+    hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
+}
+
 
 // Returns true if word is in dictionary else false
-bool check()//const char *word)
+bool check(const char *word)
 {
-    // TODO
+    int index = getHashedValue(word);
+    node* locationHead = hashTable[index];
+    node* cursor = locationHead;
+
+    while (cursor != NULL)
+    {
+        srtcasecmp();
+        cursor = cursor->next;
+    }
+        
+
+
     return false;
 }
 
@@ -80,7 +98,9 @@ bool load(const char *dictionary)
 
 
     char currentWord[LENGTH + 1];
-    node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
+    //node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
+
+    node* hashTable = makeHashTable();
 
     while (fscanf(file, "%s", currentWord) != EOF)
     {
