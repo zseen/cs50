@@ -9,7 +9,7 @@
 #include "dictionary.h"
 
 
-const int MAX_HASH = 25000;;
+const int MAX_HASH = 25000;
 node** hashTable = NULL;
 int wordsInDictCounter;
 
