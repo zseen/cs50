@@ -9,7 +9,7 @@
 #include "dictionary.h"
 
 
-const int MAX_HASH = 27;
+const int MAX_HASH = 25000;;
 node** hashTable = NULL;
 int wordsInDictCounter;
 
@@ -18,16 +18,16 @@ void makeHashTable()
     hashTable = (node**)calloc(1, (sizeof(node) * MAX_HASH));
 }
 
-int getHashedValue(const char* currentWord)
+// source of the hashing function: https://stackoverflow.com/questions/2571683/djb2-hash-function
+unsigned int getHashedValue(const char* currentWord)
 {
-    int sumOfChars = 0;
-    for (int charPosition = 0; charPosition < strlen(currentWord); charPosition++)
+    unsigned long hash = 5381;
+    for (const char* ptr = currentWord; *ptr != '\0'; ptr++)
     {
-        sumOfChars += currentWord[charPosition];
+        hash = ((hash << 5) + hash) + tolower(*ptr);
     }
 
-    int hashedValue = sumOfChars % MAX_HASH;
-    return hashedValue;
+    return hash % MAX_HASH;
 }
 
 // Returns true if word is in dictionary else false
