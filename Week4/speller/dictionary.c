@@ -14,7 +14,7 @@ int wordsInDictCounter;
 
 void makeHashTable()
 {
-    hashTable = (node**)malloc(sizeof(node) * MAX_HASH);
+    hashTable = (node**)calloc(1, (sizeof(node) * MAX_HASH));
 }
 
 int getHashedValue(const char* currentWord) /// maybe node.word?
@@ -33,7 +33,7 @@ int getHashedValue(const char* currentWord) /// maybe node.word?
 bool check(const char *word)
 {
 
-    char* lowerCaseWord = (char*)malloc(sizeof(char) * strlen(word));
+    char* lowerCaseWord = (char*)calloc(1, (sizeof(char) * strlen(word) + 1));
     for (int i = 0; i < strlen(word); ++i)
     {
         lowerCaseWord[i] = tolower(word[i]);
@@ -73,7 +73,7 @@ bool isNodeCreated(node* currentNode)
 
 node* putWordInNode(char* currentWord, node* currentNode)
 {
-    currentNode->word = malloc((strlen(currentWord)) + 1);
+    currentNode->word = calloc(1, (strlen(currentWord)) + 1);
     strcpy(currentNode->word, currentWord);
     return currentNode;
 }
@@ -113,7 +113,7 @@ bool load(const char *dictionary)
 
     while (fscanf(file, "%s", currentWord) != EOF)
     {
-        node* currentNode = malloc(sizeof(node));
+        node* currentNode = calloc(1, sizeof(node));
         if (isNodeCreated(currentNode))
         {
             node* readyNode = putWordInNode(currentWord, currentNode);
