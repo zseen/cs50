@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include "dictionary.h"
 
+
 const int MAX_HASH = 27;
 node** hashTable = NULL;
 int wordsInDictCounter;
@@ -17,7 +18,7 @@ void makeHashTable()
     hashTable = (node**)calloc(1, (sizeof(node) * MAX_HASH));
 }
 
-int getHashedValue(const char* currentWord) /// maybe node.word?
+int getHashedValue(const char* currentWord)
 {
     int sumOfChars = 0;
     for (int charPosition = 0; charPosition < strlen(currentWord); charPosition++)
@@ -32,7 +33,6 @@ int getHashedValue(const char* currentWord) /// maybe node.word?
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-
     char* lowerCaseWord = (char*)calloc(1, (sizeof(char) * strlen(word) + 1));
     for (int i = 0; i < strlen(word); ++i)
     {
@@ -61,7 +61,6 @@ bool check(const char *word)
     return false;
 }
 
-
 bool isNodeCreated(node* currentNode)
 {
     if (currentNode == NULL)
@@ -83,7 +82,6 @@ void insertNodeIntoHashTable(node* currentNode)
 {
     int index = getHashedValue(currentNode->word);
 
-
     if (hashTable[index] == NULL)
     {
         hashTable[index] = currentNode;
@@ -99,7 +97,6 @@ void insertNodeIntoHashTable(node* currentNode)
 bool load(const char *dictionary)
 {
     FILE* file = fopen(dictionary, "r");
-
     if (file == NULL)
     {
         printf("Could not open dictionary");
@@ -107,8 +104,6 @@ bool load(const char *dictionary)
     }
 
     char currentWord[LENGTH + 1];
-    //node* hashTable = (node*)malloc(sizeof(node) * MAX_HASH);
-
     makeHashTable();
 
     while (fscanf(file, "%s", currentWord) != EOF)
@@ -118,7 +113,6 @@ bool load(const char *dictionary)
         {
             node* readyNode = putWordInNode(currentWord, currentNode);
             insertNodeIntoHashTable(readyNode);
-            //printf("%s", readyNode->word);
             wordsInDictCounter++;
         }
         else
@@ -129,9 +123,7 @@ bool load(const char *dictionary)
     }
 
     fclose(file);
-
     return true;
-
 }
 
 // Returns number of words in dictionary if loaded else 0 if not yet loaded
@@ -146,7 +138,6 @@ bool unload(void)
     for (int i = 0; i < MAX_HASH; ++i)
     {
         node* cursor = hashTable[i];
-
         while (cursor != NULL)
         {
             node* temp = cursor;
