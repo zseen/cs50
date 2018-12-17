@@ -11,20 +11,20 @@
 
 const int MAX_HASH = 25000;
 node** hashTable = NULL;
-int wordsInDictCounter;
+unsigned int wordsInDictCounter;
 
 void makeHashTable()
 {
     hashTable = (node**)calloc(1, (sizeof(node) * MAX_HASH));
 }
 
-// source of the hashing function: https://stackoverflow.com/questions/2571683/djb2-hash-function
+// source of the hashing function: https://github.com/hathix/cs50-section/blob/master/code/7/sample-hash-functions/good-hash-function.c
 unsigned int getHashedValue(const char* currentWord)
 {
     unsigned long hash = 5381;
-    for (const char* ptr = currentWord; *ptr != '\0'; ptr++)
+    for (const char* pointer = currentWord; *pointer != '\0'; pointer++)
     {
-        hash = ((hash << 5) + hash) + tolower(*ptr);
+        hash = ((hash << 5) + hash) + tolower(*pointer);
     }
 
     return hash % MAX_HASH;
@@ -34,12 +34,20 @@ unsigned int getHashedValue(const char* currentWord)
 bool check(const char *word)
 {
     char* lowerCaseWord = (char*)calloc(1, (sizeof(char) * strlen(word) + 1));
+
+    if (lowerCaseWord == NULL)
+    {
+        unload();
+        return false;
+    }
+
     for (int i = 0; i < strlen(word); ++i)
     {
         lowerCaseWord[i] = tolower(word[i]);
     }
 
     lowerCaseWord[strlen(word)] = '\0';
+
     int index = getHashedValue(lowerCaseWord);
     node* locationHead = hashTable[index];
     node* cursor = locationHead;
@@ -61,18 +69,16 @@ bool check(const char *word)
     return false;
 }
 
-bool isNodeCreated(node* currentNode)
+node* createNode(char* currentWord)
 {
-    if (currentNode == NULL)
-    {
-        return false;
-    }
-    return true;
-}
-
-node* putWordInNode(char* currentWord, node* currentNode)
-{
+    node* currentNode = calloc(1, sizeof(node));
     currentNode->word = calloc(1, (strlen(currentWord)) + 1);
+    
+    if (currentNode == NULL || currentNode->word == NULL)
+    {
+        return NULL;
+    }
+    
     strcpy(currentNode->word, currentWord);
     return currentNode;
 }
@@ -104,22 +110,26 @@ bool load(const char *dictionary)
     }
 
     char currentWord[LENGTH + 1];
+
     makeHashTable();
+    if (hashTable == NULL)
+    {
+        unload();
+        return false;
+    }
 
     while (fscanf(file, "%s", currentWord) != EOF)
     {
-        node* currentNode = calloc(1, sizeof(node));
-        if (isNodeCreated(currentNode))
-        {
-            node* readyNode = putWordInNode(currentWord, currentNode);
-            insertNodeIntoHashTable(readyNode);
-            wordsInDictCounter++;
-        }
-        else
+        node* currentNode = createNode(currentWord);
+
+        if (currentNode == NULL)
         {
             unload();
             return false;
         }
+         
+        insertNodeIntoHashTable(currentNode);
+        wordsInDictCounter++;    
     }
 
     fclose(file);
