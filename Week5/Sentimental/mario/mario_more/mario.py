@@ -1,6 +1,6 @@
 def drawHalfPyramid(height):
-    for i in range(2, height + 2):
-        for spacesNum in range(0, height - i + 1):
+    for i in range(1, height + 1):
+        for spacesNum in range(0, height - i):
             print(" ", end='')
         for hashesNum in range(0, i):
             print("#", end='')
