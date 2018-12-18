@@ -9,13 +9,19 @@ def getCountWithGreedy(number):
 
     return operationCounter
 
+def isNumber(str):
+    try:
+        float(str)
+        return True
+    except ValueError:
+        return False
 
 def main():
-    money = float(input("How much should the change be?: "))
-    while money < 0:
-        money = float(input("How much should the change be?: "))
+    money = (input("How much should the change be?: "))
+    while (not isNumber(money)) or float(money) < 0:
+        money = input("How much should the change be?: ")
 
-    coinsNeeded = getCountWithGreedy(int(money * 100))
+    coinsNeeded = getCountWithGreedy(int(float(money) * 100))
     print(coinsNeeded)
 
 if __name__ == '__main__':
