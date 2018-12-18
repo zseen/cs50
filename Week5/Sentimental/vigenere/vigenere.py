@@ -1,3 +1,6 @@
+import sys
+
+
 ALPHABET_LENGTH = 26
 
 
@@ -31,14 +34,20 @@ def appendCharToEncriptedWord(ascii_aOrA, encriptedWord, keychar, plainWordChar)
 
 
 def main():
-    key = input("Please give me a key to encript with!: ")
+    if len(sys.argv) != 2:
+        print("Give me one key to encript with! ")
+        exit(1)
+
+    key = sys.argv[1]
     if not key.isalpha():
         print("Your key should only consist of letters!")
-        exit(0)
+        exit(1)
 
-    word = input("Give me a word to cipher!: ")
-    encriptedWord = encriptWord(word, key)
-    print(encriptedWord)
+    plaintext = input("Give me a word to cipher!: ")
+    encriptedWord = encriptWord(plaintext, key)
+
+    print("plaintext: ", plaintext)
+    print("ciphertext: ", encriptedWord)
 
 if __name__ == '__main__':
     main()
