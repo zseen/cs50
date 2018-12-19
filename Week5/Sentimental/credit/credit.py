@@ -22,11 +22,6 @@ def getEveryOtherDigitFromBehindMultipliedByTwo(cardNum):
     return multipliedValues
 
 
-def getTotalSumOfTwoLists(multipliedNumsListSum, notModifiedNumsList):
-    totalSum = multipliedNumsListSum + sum(notModifiedNumsList)
-    return totalSum
-
-
 def getDigitsSum(numsList):
     digitsSum = 0
 
