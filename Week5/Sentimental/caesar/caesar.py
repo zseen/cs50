@@ -2,26 +2,29 @@ import sys
 
 
 ALPHABET_LENGTH = 26
+ASCII_UPPERCASE_A = 65
+ASCII_LOWERCASE_A = 97
 
-def encriptWord(word, key):
-    encriptedWord = []
-    ascii_A = 65
-    ascii_a = 97
+
+def encryptWord(word, key):
+    encryptedWord = []
 
     for char in word:
         if not char.isalpha():
-            encriptedWord.append(char)
-        elif char == char.upper():
-            appendLetterToEncriptedWord(ascii_A, char, encriptedWord, key)
+            encryptedWord.append(char)
+        elif char.isupper():
+            encryptedLetter = getEncryptedLetter(ASCII_UPPERCASE_A, char, key)
+            encryptedWord.append(encryptedLetter)
         else:
-            appendLetterToEncriptedWord(ascii_a, char, encriptedWord, key)
+            encryptedLetter = getEncryptedLetter(ASCII_LOWERCASE_A, char, key)
+            encryptedWord.append(encryptedLetter)
 
-    return ''.join(encriptedWord)
+    return ''.join(encryptedWord)
 
 
-def appendLetterToEncriptedWord(ascii_aOrA, char, encriptedWord, key):
-    letter = ((ord(char) + key) - ascii_aOrA) % ALPHABET_LENGTH + ascii_aOrA
-    encriptedWord.append(str(chr(letter)))
+def getEncryptedLetter(asciiCaseA, char, key):
+    letter = ((ord(char) + key) - asciiCaseA) % ALPHABET_LENGTH + asciiCaseA
+    return str(chr(letter))
 
 
 def main():
@@ -29,11 +32,8 @@ def main():
         exit(1)
 
     key = sys.argv[1]
-    while not key.isdigit():
-        key = (input("Please give me a numerical key to encript with!: "))
-
     plaintext = input("Give me a word to cipher!: ")
-    ciphertext = encriptWord(plaintext, int(key))
+    ciphertext = encryptWord(plaintext, int(key))
     print("plaintext: ", plaintext)
     print("ciphertext: ", ciphertext)
 
