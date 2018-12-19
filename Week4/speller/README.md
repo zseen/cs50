@@ -17,7 +17,7 @@ resource usage statistics for the calling process, which is the sum of resources
 
 ## Why do you think we pass `before` and `after` by reference (instead of by value) to `calculate`, even though we're not changing their contents?
 
-Because it saves memory and time: passing the values includes copying the two 16 member `struct`s. As the purpose of `getrusage()` is to track the required resources (e.g., time and RAM), the results would be inaccurate.
+Because it saves memory and time: passing the values includes copying the two 16 member `struct`s. As the purpose of `getrusage()` is to track the required resources (e.g., time and RAM), it is more reasonable to use two pointers (that are either 32 or 64 bit) instead.
 
 
 ## Explain as precisely as possible, in a paragraph or more, how `main` goes about reading words from a file. In other words, convince us that you indeed understand how that function's `for` loop works.
@@ -30,7 +30,7 @@ If the word is assumed to be valid, the `words` counter is updated.
 
 Then `time_check` logs the amount of time it took the program to complete the check.
 
-Finally, the spelling of the word is checked, and if it is misspelled, it gets printed and the `misspellings` counter is incremented. Then the character position `index` is reset to 0, so that the loop starts checking the next word .
+Finally, the spelling of the word is checked, and if it is misspelled, it gets printed and the `misspellings` counter is incremented. Then the character position `index` is reset to 0, so that the loop starts checking the next word.
 
 
 ## Why do you think we used `fgetc` to read each word's characters one at a time rather than use `fscanf` with a format string like `"%s"` to read whole words at a time? Put another way, what problems might arise by relying on `fscanf` alone?
@@ -42,4 +42,4 @@ Finally, the spelling of the word is checked, and if it is misspelled, it gets p
 
 ## Why do you think we declared the parameters for `check` and `load` as `const` (which means "constant")?
 
-This way they cannot be (accidentally) modified, if we tried to do so, it would throw an error message. 
+This way they cannot be (accidentally) modified, if we tried to do so, the compiler would present an error message. 
