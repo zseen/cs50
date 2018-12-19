@@ -2,35 +2,36 @@ import sys
 
 
 ALPHABET_LENGTH = 26
+ASCII_UPPERCASE_A = 65
+ASCII_LOWERCASE_A = 97
 
 
-def encriptWord(plainWord, key):
-    encriptedWord = []
+def encryptWord(plainWord, key):
+    encryptedWord = []
     keyLength = len(key)
-    ascii_A = 65
-    ascii_a = 97
     keyIndex = 0
 
     for i in range(len(plainWord)):
         if plainWord[i].isalpha():
             keycharInt = ord((key[keyIndex % keyLength].upper()))
-            keychar = (keycharInt - ascii_A) % 26
+            keychar = (keycharInt - ASCII_UPPERCASE_A) % 26
 
-            if plainWord[i] == plainWord[i].upper():
-                appendCharToEncriptedWord(ascii_A, encriptedWord, keychar, plainWord[i])
-                keyIndex += 1
+            if plainWord[i].isupper():
+                encryptedLetter = getEncryptedLetter(ASCII_UPPERCASE_A, keychar, plainWord[i])
+                encryptedWord.append(encryptedLetter)
             else:
-                appendCharToEncriptedWord(ascii_a, encriptedWord, keychar, plainWord[i])
-                keyIndex += 1
+                encryptedLetter = getEncryptedLetter(ASCII_LOWERCASE_A, keychar, plainWord[i])
+                encryptedWord.append(encryptedLetter)
+            keyIndex += 1
         else:
-            encriptedWord.append(plainWord[i])
+            encryptedWord.append(plainWord[i])
 
-    return ''.join(encriptedWord)
+    return ''.join(encryptedWord)
 
 
-def appendCharToEncriptedWord(ascii_aOrA, encriptedWord, keychar, plainWordChar):
-    letter = str(chr(((ord(plainWordChar) + keychar) - ascii_aOrA) % ALPHABET_LENGTH + ascii_aOrA))
-    encriptedWord.append(letter)
+def getEncryptedLetter(asciiCaseA, keychar, plainWordChar):
+    letter = str(chr(((ord(plainWordChar) + keychar) - asciiCaseA) % ALPHABET_LENGTH + asciiCaseA))
+    return letter
 
 
 def main():
@@ -44,10 +45,10 @@ def main():
         exit(1)
 
     plaintext = input("Give me a word to cipher!: ")
-    encriptedWord = encriptWord(plaintext, key)
+    encryptedWord = encryptWord(plaintext, key)
 
     print("plaintext: ", plaintext)
-    print("ciphertext: ", encriptedWord)
+    print("ciphertext: ", encryptedWord)
 
 if __name__ == '__main__':
     main()
