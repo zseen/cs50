@@ -30,8 +30,7 @@ unsigned int getHashedValue(const char* currentWord)
     return hash % MAX_HASH;
 }
 
-// Returns true if word is in dictionary else false
-bool check(const char *word)
+char* makeWordLowerCase(const char* word)
 {
     char* lowerCaseWord = (char*)calloc(1, (sizeof(char) * strlen(word) + 1));
 
@@ -47,7 +46,13 @@ bool check(const char *word)
     }
 
     lowerCaseWord[strlen(word)] = '\0';
+    return lowerCaseWord;
+}
 
+// Returns true if word is in dictionary else false
+bool check(const char *word)
+{
+    char* lowerCaseWord = makeWordLowerCase(word);
     int index = getHashedValue(lowerCaseWord);
     node* locationHead = hashTable[index];
     node* cursor = locationHead;
@@ -72,9 +77,13 @@ bool check(const char *word)
 node* createNode(char* currentWord)
 {
     node* currentNode = calloc(1, sizeof(node));
+    if (currentNode == NULL)
+    {
+        return NULL;
+    }
+
     currentNode->word = calloc(1, (strlen(currentWord)) + 1);
-    
-    if (currentNode == NULL || currentNode->word == NULL)
+    if (currentNode->word == NULL)
     {
         return NULL;
     }
@@ -129,7 +138,7 @@ bool load(const char *dictionary)
         }
          
         insertNodeIntoHashTable(currentNode);
-        wordsInDictCounter++;    
+        ++wordsInDictCounter;
     }
 
     fclose(file);
