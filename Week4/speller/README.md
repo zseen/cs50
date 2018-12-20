@@ -17,7 +17,7 @@ resource usage statistics for the calling process, which is the sum of resources
 
 ## Why do you think we pass `before` and `after` by reference (instead of by value) to `calculate`, even though we're not changing their contents?
 
-Because it saves memory and time: passing the values includes copying the two 16 member `struct`s. As the purpose of `getrusage()` is to track the required resources (e.g., time and RAM), it is more reasonable to use two pointers (that are either 32 or 64 bit) instead.
+Because it saves memory and time: passing by values is expensive, as it includes copying the two 16 member `struct`s. Instead, using two pointers, that are either 32 or 64 bit, is cheaper.
 
 
 ## Explain as precisely as possible, in a paragraph or more, how `main` goes about reading words from a file. In other words, convince us that you indeed understand how that function's `for` loop works.

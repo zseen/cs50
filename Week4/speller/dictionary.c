@@ -9,7 +9,7 @@
 #include "dictionary.h"
 
 
-const int MAX_HASH = 25000;
+const unsigned int MAX_HASH = 25000;
 node** hashTable = NULL;
 unsigned int wordsInDictCounter;
 
@@ -30,7 +30,7 @@ unsigned int getHashedValue(const char* currentWord)
     return hash % MAX_HASH;
 }
 
-char* makeWordLowerCase(const char* word)
+char* createLowerCaseWord(const char* word)
 {
     char* lowerCaseWord = (char*)calloc(1, (sizeof(char) * strlen(word) + 1));
 
@@ -52,7 +52,7 @@ char* makeWordLowerCase(const char* word)
 // Returns true if word is in dictionary else false
 bool check(const char *word)
 {
-    char* lowerCaseWord = makeWordLowerCase(word);
+    char* lowerCaseWord = createLowerCaseWord(word);
     int index = getHashedValue(lowerCaseWord);
     node* locationHead = hashTable[index];
     node* cursor = locationHead;
@@ -67,7 +67,7 @@ bool check(const char *word)
         else
         {
             cursor = cursor->next;
-        }    
+        }
     }
 
     free(lowerCaseWord);
@@ -87,7 +87,7 @@ node* createNode(char* currentWord)
     {
         return NULL;
     }
-    
+
     strcpy(currentNode->word, currentWord);
     return currentNode;
 }
@@ -136,7 +136,7 @@ bool load(const char *dictionary)
             unload();
             return false;
         }
-         
+
         insertNodeIntoHashTable(currentNode);
         ++wordsInDictCounter;
     }
