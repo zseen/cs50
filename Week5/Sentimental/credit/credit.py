@@ -51,13 +51,13 @@ def getCardType(cardNum):
         cardNumLengthVISA = (cardNumLength == 13 or cardNumLength == 16)
 
         if isDigitsSumValid and cardNumLength == 15 and firstDigit == "3" and secondDigitAMEX:
-                return "AMEX"
+            return "AMEX"
 
         elif isDigitsSumValid and cardNumLength == 16 and firstDigit == "5" and secondDigitMASTERCARD:
-                return "MASTERCARD"
+            return "MASTERCARD"
 
         elif isDigitsSumValid and cardNumLengthVISA and firstDigit == "4":
-                return "VISA"
+            return "VISA"
 
     return "INVALID"
 

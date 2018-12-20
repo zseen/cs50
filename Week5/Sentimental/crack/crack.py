@@ -2,6 +2,10 @@ import crypt
 import sys
 
 
+MIN_WORDLENGTH = 1
+MAX_WORDLENGTH = 6
+
+
 def getLexicographicalNextString(word):
     word = list(word)
     for currentPosition in range(len(word) - 1, -1, -1):
@@ -19,7 +23,7 @@ def getLexicographicalNextString(word):
 
 
 def crackHashedWord(targetHash, salt):
-    for wordLength in range(1, 6):
+    for wordLength in range(MIN_WORDLENGTH, MAX_WORDLENGTH):
         currentWord = wordLength * 'A'
         finalWord = wordLength * 'z'
 

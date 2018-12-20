@@ -10,14 +10,14 @@ def encryptWord(word, key):
     encryptedWord = []
 
     for char in word:
-        if not char.isalpha():
-            encryptedWord.append(char)
-        elif char.isupper():
+        if char.isupper():
             encryptedLetter = getEncryptedLetter(ASCII_UPPERCASE_A, char, key)
             encryptedWord.append(encryptedLetter)
-        else:
+        elif char.islower():
             encryptedLetter = getEncryptedLetter(ASCII_LOWERCASE_A, char, key)
             encryptedWord.append(encryptedLetter)
+        else:
+            encryptedWord.append(char)
 
     return ''.join(encryptedWord)
 

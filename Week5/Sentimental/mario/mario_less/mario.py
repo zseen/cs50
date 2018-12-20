@@ -8,10 +8,9 @@ def drawHalfPyramid(height):
 
 
 def main():
-    inputText = "How tall should the half-pyramid be? 0 <= height <= 23: "
-    height = input(inputText)
+    height = "-1"
     while (not height.isdigit()) or (23 < int(height) or 0 > int(height)):
-        height = input(inputText)
+        height = input("How tall should the half-pyramid be? 0 <= height <= 23: ")
 
     drawHalfPyramid(int(height))
 
