@@ -22,9 +22,9 @@ void makeHashTable()
 unsigned int getHashedValue(const char* currentWord)
 {
     unsigned long hash = 5381;
-    for (const char* pointer = currentWord; *pointer != '\0'; pointer++)
+    for (const char* currentCharPointer = currentWord; *currentCharPointer != '\0'; currentCharPointer++)
     {
-        hash = ((hash << 5) + hash) + tolower(*pointer);
+        hash = ((hash << 5) + hash) + tolower(*currentCharPointer);
     }
 
     return hash % MAX_HASH;
