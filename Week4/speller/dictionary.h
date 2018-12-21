@@ -16,3 +16,10 @@ unsigned int size(void);
 bool unload(void);
 
 #endif // DICTIONARY_H
+
+typedef struct node
+{ 
+    char word[LENGTH + 1];
+    struct node* next;
+}
+node;
