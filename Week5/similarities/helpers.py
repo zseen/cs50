@@ -3,8 +3,8 @@ from nltk.tokenize import sent_tokenize
 
 def lines(a, b):
     """Return lines in both a and b"""
-    linesInA = a.splitlines("\n")
-    linesInB = b.splitlines("\n")
+    linesInA = a.splitlines()
+    linesInB = b.splitlines()
 
     commonLinesList = []
     for line in linesInA:
@@ -30,7 +30,7 @@ def sentences(a, b):
 
 def getSubstringsInString(string, size):
     substringsList = []
-    for char in range(0, len(string) - size):
+    for char in range(0, len(string) - size + 1):
         substringsList.append(string[char: char + size])
 
     return substringsList
