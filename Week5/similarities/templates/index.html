@@ -4,15 +4,15 @@
 
     <div class="col">
         <form action="/compare" enctype="multipart/form-data" method="post">
-            File1: <input type="file" name='file1'/><br>
-            File2: <input type="file" name='file2'/><br>
+            First file: <input type="file" name='file1' required><br>
+            Second file: <input type="file" name='file2' required><br>
 
-            Compare according to:
-            <br><input type="radio" name="algorithm" value="lines" > lines <br>
-            <input type="radio" name="algorithm" value="sentences"> sentences <br>
-            <input type="radio" name="algorithm" value="substrings"> substrings <br>
+            Compare according to:<br>
+            <input type="radio" name="algorithm" value="lines" checked>lines<br>
+            <input type="radio" name="algorithm" value="sentences">sentences<br>
+            <input type="radio" name="algorithm" value="substrings">substrings -
 
-            length of substring: <input type="number" name="length" placeholder="5"/><br>
+            length of substring: <input type="number" name="length" placeholder="5"><br>
 
             <button type="submit">Compare</button>
 
