@@ -1,16 +1,19 @@
 from nltk.tokenize import sent_tokenize
 
 
+def createCommonItemsList(containerA, containerB):
+    commonItemsSet = set()
+    for item in containerA:
+        if item in containerB:
+            commonItemsSet.add(item)
+    return list(commonItemsSet)
+
 def lines(a, b):
     """Return lines in both a and b"""
     linesInA = a.splitlines()
     linesInB = b.splitlines()
 
-    commonLinesList = []
-    for line in linesInA:
-        if line in linesInB and line not in commonLinesList:
-            commonLinesList.append(line)
-
+    commonLinesList = createCommonItemsList(linesInA, linesInB)
     return commonLinesList
 
 
@@ -20,11 +23,7 @@ def sentences(a, b):
     sentencesInA = sent_tokenize(a, language='english')
     sentencesInB = sent_tokenize(b, language='english')
 
-    commonSentencesList = []
-    for sentence in sentencesInA:
-        if sentence in sentencesInB and sentence not in commonSentencesList:
-            commonSentencesList.append(sentence)
-
+    commonSentencesList = createCommonItemsList(sentencesInA, sentencesInB)
     return commonSentencesList
 
 
