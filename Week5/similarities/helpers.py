@@ -41,12 +41,6 @@ def substrings(a, b, n):
     substringsOfFirstString = getSubstringsInString(a, n)
     substringsOfSecondString = getSubstringsInString(b, n)
 
-    commonSubstringsList = []
-    for substring in substringsOfFirstString:
-        if substring in substringsOfSecondString and substring not in commonSubstringsList:
-            commonSubstringsList.append(substring)
-
+    commonSubstringsList = createCommonItemsList(substringsOfFirstString, substringsOfSecondString)
     return commonSubstringsList
-
-
 
