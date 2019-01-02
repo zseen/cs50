@@ -1,20 +1,12 @@
 from nltk.tokenize import sent_tokenize
 
 
-def createCommonItemsList(containerA, containerB):
-    commonItemsSet = set()
-    for item in containerA:
-        if item in containerB:
-            commonItemsSet.add(item)
-    return list(commonItemsSet)
-
 def lines(a, b):
     """Return lines in both a and b"""
     linesInA = a.splitlines()
     linesInB = b.splitlines()
 
-    commonLinesList = createCommonItemsList(linesInA, linesInB)
-    return commonLinesList
+    return list(set(linesInA) & set(linesInB))
 
 
 def sentences(a, b):
@@ -23,8 +15,7 @@ def sentences(a, b):
     sentencesInA = sent_tokenize(a, language='english')
     sentencesInB = sent_tokenize(b, language='english')
 
-    commonSentencesList = createCommonItemsList(sentencesInA, sentencesInB)
-    return commonSentencesList
+    return list(set(sentencesInA) & set(sentencesInB))
 
 
 def getSubstringsInString(string, size):
@@ -41,6 +32,5 @@ def substrings(a, b, n):
     substringsOfFirstString = getSubstringsInString(a, n)
     substringsOfSecondString = getSubstringsInString(b, n)
 
-    commonSubstringsList = createCommonItemsList(substringsOfFirstString, substringsOfSecondString)
-    return commonSubstringsList
+    return list(set(substringsOfFirstString) & set(substringsOfSecondString))
 
