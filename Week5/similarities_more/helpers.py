@@ -12,35 +12,52 @@ class Operation(Enum):
         return str(self.name.lower())
 
 
-def distances(a, b):
-    """Calculate edit distance from a to b"""
-    rows = len(a) + 1
-    columns = len(b) + 1
-    cost = [[(0, None)] * columns for i in range(rows)]
+class ValueWithOperation:
+    def __init__(self, value, operation):
+        self.value = value
+        self.operation = operation
 
-    for row in range(1, rows):
-        cost[row][0] = (row, Operation.DELETED)
-    for column in range(1, columns):
-        cost[0][column] = (column, Operation.INSERTED)
 
-    for i in range(1, rows):
-        for j in range(1, columns):
-            deletionCost = cost[i-1][j]
-            insertionCost = cost[i][j-1]
-            substitutionCost = cost[i-1][j-1]
+def calculateValueAndOperationMatrix(a, b):
+    numRows = len(a) + 1
+    numColumns = len(b) + 1
+    cost = [[ValueWithOperation(0, None)] * numColumns for i in range(numRows)]
 
-            substCost = substitutionCost[0]
-            if a[i - 1] == b[j - 1]:
-                minCost = min(deletionCost[0] + 1, insertionCost[0] + 1, substCost)
+    for row in range(1, numRows):
+        cost[row][0] = ValueWithOperation(row, Operation.DELETED)
+    for column in range(1, numColumns):
+        cost[0][column] = ValueWithOperation(column, Operation.INSERTED)
+
+    for j in range(1, numRows):
+        for i in range(1, numColumns):
+            deletionCost = cost[j - 1][i]
+            insertionCost = cost[j][i - 1]
+            substitutionCost = cost[j - 1][i - 1]
+
+            if a[j - 1] == b[i - 1]:
+                minCost = min(deletionCost.value + 1, insertionCost.value + 1, substitutionCost.value)
             else:
-                substCost += 1
-                minCost = min(deletionCost[0] + 1, insertionCost[0] + 1, substCost)
+                minCost = min(deletionCost.value + 1, insertionCost.value + 1, substitutionCost.value + 1)
 
-            if minCost == deletionCost[0] + 1:
-                cost[i][j] = (deletionCost[0] + 1, Operation.DELETED)
-            elif minCost == insertionCost[0] + 1:
-                cost[i][j] = (insertionCost[0] + 1, Operation.INSERTED)
+            if minCost == deletionCost.value + 1:
+                cost[j][i] = ValueWithOperation(deletionCost.value + 1, Operation.DELETED)
+            elif minCost == insertionCost.value + 1:
+                cost[j][i] = ValueWithOperation(insertionCost.value + 1, Operation.INSERTED)
             else:
-                cost[i][j] = (substCost, Operation.SUBSTITUTED)
+                cost[j][i] = ValueWithOperation(substitutionCost.value + 1, Operation.SUBSTITUTED)
 
     return cost
+
+def convertToTupleMatrix(valueAndOperationMatrix):
+    matrixCopy = [row[:] for row in valueAndOperationMatrix]
+    for j in range(1, len(matrixCopy)):
+        for i in range(1, len(matrixCopy[0])):
+            matrixCopy[j][i] = (valueAndOperationMatrix[j], valueAndOperationMatrix[i])
+
+    return matrixCopy
+
+def distances(a, b):
+    """Calculate edit distance from a to b"""
+    valueAndOperationMatrix = calculateValueAndOperationMatrix(a, b)
+    return convertToTupleMatrix(valueAndOperationMatrix)
+
