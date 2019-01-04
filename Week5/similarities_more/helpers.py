@@ -34,30 +34,31 @@ def calculateValueAndOperationMatrix(a, b):
             insertionCost = cost[j][i - 1]
             substitutionCost = cost[j - 1][i - 1]
 
+            s = substitutionCost.value
             if a[j - 1] == b[i - 1]:
                 minCost = min(deletionCost.value + 1, insertionCost.value + 1, substitutionCost.value)
             else:
-                minCost = min(deletionCost.value + 1, insertionCost.value + 1, substitutionCost.value + 1)
+                s += 1
+                minCost = min(deletionCost.value + 1, insertionCost.value + 1, s )
 
             if minCost == deletionCost.value + 1:
                 cost[j][i] = ValueWithOperation(deletionCost.value + 1, Operation.DELETED)
             elif minCost == insertionCost.value + 1:
                 cost[j][i] = ValueWithOperation(insertionCost.value + 1, Operation.INSERTED)
             else:
-                cost[j][i] = ValueWithOperation(substitutionCost.value + 1, Operation.SUBSTITUTED)
+                cost[j][i] = ValueWithOperation(s, Operation.SUBSTITUTED)
 
     return cost
 
 def convertToTupleMatrix(valueAndOperationMatrix):
     matrixCopy = [row[:] for row in valueAndOperationMatrix]
-    for j in range(1, len(matrixCopy)):
-        for i in range(1, len(matrixCopy[0])):
-            matrixCopy[j][i] = (valueAndOperationMatrix[j], valueAndOperationMatrix[i])
-
+    for j in range(0, len(matrixCopy)):
+        for i in range(0, len(matrixCopy[0])):
+            matrixCopy[j][i] = (valueAndOperationMatrix[j][i].value, valueAndOperationMatrix[j][i].operation)
     return matrixCopy
 
 def distances(a, b):
     """Calculate edit distance from a to b"""
     valueAndOperationMatrix = calculateValueAndOperationMatrix(a, b)
-    return convertToTupleMatrix(valueAndOperationMatrix)
-
+    tupleMatrix = convertToTupleMatrix(valueAndOperationMatrix)
+    return tupleMatrix
