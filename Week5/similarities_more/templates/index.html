@@ -2,6 +2,12 @@
 
 {% block body %}
 
-    <!-- TODO -->
+    <form action="/score" method="post" >
+        First string: <br>
+        <input type="text" name="string1" required><br>
+        Second string: <br>
+        <input type="text" name="string2" required><br>
+        <button type="submit">Transform!</button>
+    </form>
 
 {% endblock %}

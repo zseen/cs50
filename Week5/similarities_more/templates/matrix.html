@@ -1,1 +1,36 @@
-<!-- TODO -->
+<table class="table table-bordered table-sm">
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+            <th></th>
+            {% for character in s2 %}
+                <th class="h5">{{character}}</th>
+            {% endfor %}
+        </tr>
+        <tr>
+            <th></th>
+            <th></th>
+            {% for i in range((s2)|length + 1) %}
+                <th class="h6">{{i}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        <th></th>
+        <th class="h6">0</th>
+        {% for i in range((s2)|length + 1) %}
+                <td>{{i}}</td>
+        {% endfor %}
+
+        {% for charIndex in range(s1|length) %}
+            <tr>
+                <th class="h5">{{s1[charIndex]}}</th>
+                <th class="h6">{{charIndex + 1}}</th>
+                {% for cost in matrix[charIndex + 1] %}
+                    <td>{{cost[0]}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
