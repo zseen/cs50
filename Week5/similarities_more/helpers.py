@@ -35,7 +35,7 @@ def calculateValueAndOperationMatrix(a, b):
             substitutionCost = cost[j - 1][i - 1]
 
             if a[j - 1] != b[i - 1]:
-                substitutionCost.value += 1  # the original substitutionCost in the matrix does not get modified
+                substitutionCost.value += 1  # the original substitutionCost in the matrix does not get modified, as it is a copy
 
             minCost = min(deletionCost.value + 1, insertionCost.value + 1, substitutionCost.value)
             if minCost == deletionCost.value + 1:
