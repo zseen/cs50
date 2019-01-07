@@ -40,7 +40,7 @@ db = SQL("sqlite:///finance.db")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    return apology("TODO", 200)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -115,7 +115,30 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
-    return apology("TODO")
+    session.clear()
+    if request.method == "POST":
+        if not request.form.get("username"):
+            return apology("must provide a username", 400)
+        elif not request.form.get("password"):
+            return apology("must provide a password", 400)
+        elif not request.form.get("confirmation"):
+            return apology("must confirm your password")
+        elif request.form.get("password") != request.form.get("confirmation"):
+            return apology("password mismatch")
+
+        hashedPW = generate_password_hash(request.form.get("password"))
+        newRegisteredUser = db.execute("INSERT INTO users(username, hash) VALUES(:username, :hash)",
+                                        username=request.form.get("username"),
+                                        hash=hashedPW)
+        if not newRegisteredUser:
+            return apology("username already taken", 400)
+
+        session["user_id"] = newRegisteredUser
+
+        return redirect("/")
+
+    else:
+        return render_template("register.html")
 
 
 @app.route("/sell", methods=["GET", "POST"])
