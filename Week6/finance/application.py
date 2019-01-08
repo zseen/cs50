@@ -47,7 +47,37 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        stock = lookup(request.form.get("symbol"))
+        if not stock:
+            return apology("must provide symbol", 400)
+
+        shares = request.form.get("shares")
+        print(shares)
+        if (not shares) or (not shares.isdigit()) or int(shares) <= 0:
+            return apology("invalid number", 400)
+
+        rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+        cashAvailable = float(rows[0]['cash'])
+        priceTotal = float(stock['price'] * int(shares))
+
+        if cashAvailable < priceTotal:
+            return apology("not enough money to purchase", 400)
+
+        db.execute("INSERT INTO transactions (symbol, shares, price, date, id) VALUES(:symbol, :shares, :price, datetime('now'), :id)",
+                   symbol=request.form.get("symbol"),
+                   shares=shares,
+                   price=usd(stock["price"]),
+                   id=session["user_id"])
+
+        db.execute("UPDATE users SET cash = cash - :order WHERE id = :id",
+                   id=session["user_id"],
+                   order=priceTotal)
+
+        return redirect("/")
+
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
@@ -109,7 +139,15 @@ def logout():
 @login_required
 def quote():
     """Get stock quote."""
-    return apology("TODO")
+    if request.method == "POST":
+        stock = lookup(request.form.get("symbol"))
+        if stock is None:
+            return apology("invalid symbol", 400)
+
+        return render_template("quoted.html", stock=stock)
+
+    else:
+        return render_template("quote.html")
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -122,9 +160,9 @@ def register():
         elif not request.form.get("password"):
             return apology("must provide a password", 400)
         elif not request.form.get("confirmation"):
-            return apology("must confirm your password")
+            return apology("must confirm your password", 400)
         elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("password mismatch")
+            return apology("password mismatch", 400)
 
         hashedPW = generate_password_hash(request.form.get("password"))
         newRegisteredUser = db.execute("INSERT INTO users(username, hash) VALUES(:username, :hash)",
