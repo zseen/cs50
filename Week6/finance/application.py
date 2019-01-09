@@ -40,34 +40,25 @@ db = SQL("sqlite:///finance.db")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
-    money = rows[0]["cash"]
+
     stocks = db.execute("SELECT shares, symbol FROM transactions WHERE id=:id", id=session["user_id"])
 
     grandTotal = 0
+    for stock in stocks:
+        symbol = stock["symbol"]
+        shares = stock["shares"]
+        quote = lookup(symbol)
+        total = shares * quote["price"]
+        grandTotal += total
+        db.execute("UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol",
+                   price=usd(quote["price"]), total=usd(total), id=session["user_id"], symbol=symbol)
 
-    if not stocks:
-        return render_template("index.html", cash=usd(money))
+    updatedTransactions = db.execute("SELECT * FROM transactions WHERE id=:id", id=session["user_id"])
 
-    else:
-        for stock in stocks:
-            symbol = stock["symbol"]
-            shares = stock["shares"]
-            quote = lookup(symbol)
-            total = shares * quote["price"]
-            grandTotal += total
-            db.execute("UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol",
-                       price=usd(quote["price"]), total=usd(total), id=session["user_id"], symbol=symbol)
+    rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+    money = rows[0]["cash"]
 
-
-
-    updatedTransactions = db.execute("SELECT * FROM transactions  WHERE id=:id", id=session["user_id"])
-
-
-
-    return render_template("index.html", stocks=updatedTransactions, cash=usd(int(money)), total=usd(grandTotal))
-
-
+    return render_template("index.html", stocks=updatedTransactions, cash=money, total=usd(grandTotal))
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -80,16 +71,15 @@ def buy():
             return apology("must provide symbol", 400)
 
         shares = request.form.get("shares")
-        print(shares)
         if (not shares) or (not shares.isdigit()) or int(shares) <= 0:
             return apology("invalid number", 400)
 
         rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
-        cashAvailable = float(rows[0]['cash'])
+        cashAvailable = (rows[0]['cash'])
         priceTotal = float(stock['price'] * int(shares))
 
-        if cashAvailable < priceTotal:
-            return apology("not enough money to purchase", 400)
+        #if cashAvailable < priceTotal:
+            #return apology("not enough money to purchase", 400)
 
         db.execute("INSERT INTO transactions (symbol, shares, price, date, id) VALUES(:symbol, :shares, :price, datetime('now'), :id)",
                    symbol=request.form.get("symbol"),
