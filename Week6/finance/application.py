@@ -40,7 +40,34 @@ db = SQL("sqlite:///finance.db")
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO", 200)
+    rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+    money = rows[0]["cash"]
+    stocks = db.execute("SELECT shares, symbol FROM transactions WHERE id=:id", id=session["user_id"])
+
+    grandTotal = 0
+
+    if not stocks:
+        return render_template("index.html", cash=usd(money))
+
+    else:
+        for stock in stocks:
+            symbol = stock["symbol"]
+            shares = stock["shares"]
+            quote = lookup(symbol)
+            total = shares * quote["price"]
+            grandTotal += total
+            db.execute("UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol",
+                       price=usd(quote["price"]), total=usd(total), id=session["user_id"], symbol=symbol)
+
+
+
+    updatedTransactions = db.execute("SELECT * FROM transactions  WHERE id=:id", id=session["user_id"])
+
+
+
+    return render_template("index.html", stocks=updatedTransactions, cash=usd(int(money)), total=usd(grandTotal))
+
+
 
 
 @app.route("/buy", methods=["GET", "POST"])
