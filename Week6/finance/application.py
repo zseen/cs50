@@ -203,7 +203,37 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    return apology("TODO")
+    if request.method == "POST":
+        stock = lookup(request.form.get("symbol"))
+        if not stock:
+            return apology("Please choose a valid symbol", 400)
+        numSharesToSell = request.form.get("shares")
+        acquiredShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol",
+                                    id=session["user_id"], symbol=stock["symbol"])
+        acquiredSharesNum = acquiredShares[0]["shares"]
+        if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0)\
+                or (int(numSharesToSell) > acquiredSharesNum):
+            return apology("Invalid transaction", 400)
+
+        quote = lookup(stock["symbol"])
+        totalSellPrice = int(numSharesToSell) * quote["price"]
+
+        if acquiredSharesNum - numSharesToSell > 0:
+            db.execute("UPDATE transactions SET shares=shares - :numSold, total=total+:totalSellPrice WHERE id=:id AND symbol=:symbol",
+                       numsold=numSharesToSell, totalSellPrice=usd(totalSellPrice), id=session["user_id"], symbol=stock["symbol"])
+
+        else:
+            db.execute("DELETE name, shares, symbol, total FROM transactions WHERE id=:id AND symbol=:symbol",
+                id=session["user_id"], symbol=stock["symbol"])
+
+        db.execute("UPDATE users SET cash = cash + :moneyGained WHERE id = :id",
+                   id=session["user_id"], moneyGained=totalSellPrice)
+
+
+        return redirect("/")
+
+    else:
+        return render_template("buy.html")
 
 
 def errorhandler(e):
