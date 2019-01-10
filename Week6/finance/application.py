@@ -75,26 +75,44 @@ def buy():
             return apology("invalid number", 400)
 
         rows = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
-        cashAvailable = (rows[0]['cash'])
+        cashAvailable = float(rows[0]["cash"])
         priceTotal = float(stock['price'] * int(shares))
 
-        #if cashAvailable < priceTotal:
-            #return apology("not enough money to purchase", 400)
+        if cashAvailable < priceTotal:
+            return apology("not enough money to purchase", 400)
 
-        db.execute("INSERT INTO transactions (symbol, shares, price, date, id) VALUES(:symbol, :shares, :price, datetime('now'), :id)",
-                   symbol=request.form.get("symbol"),
-                   shares=shares,
-                   price=usd(stock["price"]),
-                   id=session["user_id"])
+        # db.execute("INSERT INTO transactions (symbol, shares, price, date, id) VALUES(:symbol, :shares, :price, datetime('now'), :id)",
+        #            symbol=stock["symbol"],
+        #            shares=shares,
+        #            price=usd(stock["price"]),
+        #            id=session["user_id"])
 
         db.execute("UPDATE users SET cash = cash - :order WHERE id = :id",
                    id=session["user_id"],
                    order=priceTotal)
 
+        userShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol",
+                                 id=session["user_id"], symbol=stock["symbol"])
+        if not userShares:
+            db.execute("INSERT INTO transactions (name, shares, price, total, symbol, date, id)"
+                       "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :id)",
+                       name=stock["name"], shares=shares, price=usd(stock["price"]),
+                       total=usd(priceTotal), symbol=stock["symbol"], id=session["user_id"])
+
+        else:
+            sharesTotal = userShares[0]["shares"] + int(shares)
+            db.execute("UPDATE transactions SET shares=:shares WHERE id=:id AND symbol=:symbol",
+                       shares=sharesTotal, id=session["user_id"],
+                       symbol=stock["symbol"])
+            db.execute("UPDATE transactions SET total=:total WHERE id=:id AND symbol=:symbol",
+                       total=usd(sharesTotal * (stock["price"])), id=session["user_id"],
+                       symbol=stock["symbol"])
+
         return redirect("/")
 
     else:
         return render_template("buy.html")
+
 
 
 @app.route("/history")
