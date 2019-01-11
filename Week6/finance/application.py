@@ -204,36 +204,43 @@ def register():
 def sell():
     """Sell shares of stock"""
     if request.method == "POST":
-        stock = lookup(request.form.get("symbol"))
+        stock = request.form.get("symbol")
         if not stock:
             return apology("Please choose a valid symbol", 400)
+
         numSharesToSell = request.form.get("shares")
-        acquiredShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol",
-                                    id=session["user_id"], symbol=stock["symbol"])
-        acquiredSharesNum = acquiredShares[0]["shares"]
-        if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0)\
-                or (int(numSharesToSell) > acquiredSharesNum):
+        if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0):
             return apology("Invalid transaction", 400)
 
-        quote = lookup(stock["symbol"])
+        acquiredStocks = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
+                                    id=session["user_id"])
+        acquiredSharesNum = acquiredStocks[0]["shares"]
+
+        if int(numSharesToSell) > acquiredSharesNum:
+            return apology("not enough shares", 400)
+
+        quote = lookup(stock)
         totalSellPrice = int(numSharesToSell) * quote["price"]
 
-        if acquiredSharesNum - numSharesToSell > 0:
+        if acquiredSharesNum - int(numSharesToSell) > 0:
             db.execute("UPDATE transactions SET shares=shares - :numSold, total=total+:totalSellPrice WHERE id=:id AND symbol=:symbol",
-                       numsold=numSharesToSell, totalSellPrice=usd(totalSellPrice), id=session["user_id"], symbol=stock["symbol"])
+                       numSold=int(numSharesToSell), totalSellPrice=usd(totalSellPrice), id=session["user_id"], symbol=stock)
 
         else:
-            db.execute("DELETE name, shares, symbol, total FROM transactions WHERE id=:id AND symbol=:symbol",
-                id=session["user_id"], symbol=stock["symbol"])
+            db.execute("UPDATE transactions SET total=total+:totalSellPrice WHERE id=:id AND symbol=:symbol",
+                       totalSellPrice=usd(totalSellPrice),  id=session["user_id"], symbol=stock)
+            db.execute("DELETE FROM transactions WHERE id=:id AND symbol=:symbol",
+                id=session["user_id"], symbol=stock)
 
         db.execute("UPDATE users SET cash = cash + :moneyGained WHERE id = :id",
                    id=session["user_id"], moneyGained=totalSellPrice)
 
-
         return redirect("/")
 
     else:
-        return render_template("buy.html")
+        acquiredStocks = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
+                                    id=session["user_id"])
+        return render_template("sell.html", stocks=acquiredStocks)
 
 
 def errorhandler(e):
