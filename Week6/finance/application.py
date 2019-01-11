@@ -36,12 +36,7 @@ Session(app)
 db = SQL("sqlite:///finance.db")
 
 
-@app.route("/")
-@login_required
-def index():
-    """Show portfolio of stocks"""
-    stocks = db.execute("SELECT shares, symbol FROM transactions WHERE id=:id", id=session["user_id"])
-
+def getTotalSharesValue(stocks):
     totalSharesValue = 0
     for stock in stocks:
         symbol = stock["symbol"]
@@ -49,15 +44,57 @@ def index():
         quote = lookup(symbol)
         sharesValue = shares * quote["price"]
         totalSharesValue += sharesValue
-        db.execute("UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol",
-                   price=usd(quote["price"]), total=usd(sharesValue), id=session["user_id"], symbol=symbol)
+        transactionsPriceTotalUpdateQuery = "UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol"
+        db.execute(transactionsPriceTotalUpdateQuery,
+                   price=usd(quote["price"]),
+                   total=usd(sharesValue),
+                   id=session["user_id"],
+                   symbol=symbol)
+    return totalSharesValue
 
-    updatedTransactions = db.execute("SELECT * FROM transactions WHERE id=:id", id=session["user_id"])
-    moneyAvailable = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
+
+@app.route("/")
+@login_required
+def index():
+    """Show portfolio of stocks"""
+    sharesSymbolSelectionQuery = "SELECT shares, symbol FROM transactions WHERE id=:id"
+    stocks = db.execute(sharesSymbolSelectionQuery,
+                        id=session["user_id"])
+    totalSharesValue = getTotalSharesValue(stocks)
+
+    wholeUsersSelectionQuery = "SELECT name, symbol, shares, price, total FROM transactions WHERE id=:id"
+    updatedTransactions = db.execute(wholeUsersSelectionQuery,
+                                     id=session["user_id"])
+
+    usersCashSelectionQuery = "SELECT cash FROM users WHERE id=:id"
+    moneyAvailable = db.execute(usersCashSelectionQuery,
+                                id=session["user_id"])
+
     cash = moneyAvailable[0]["cash"]
     grandTotal = cash + totalSharesValue
 
     return render_template("index.html", stocks=updatedTransactions, cash=usd(cash), total=usd(totalSharesValue), grandTotal=usd(grandTotal))
+
+
+def handleBuyingProcess(acquiredShares, stock, numSharesToBuy, totalPurchasePrice):
+    if not acquiredShares:
+        wholeTransactionsInsertionQuery = "INSERT INTO transactions (name, shares, price, total, symbol, date, id)" \
+                                          "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :id)"
+        db.execute(wholeTransactionsInsertionQuery,
+                   name=stock["name"],
+                   shares=numSharesToBuy,
+                   price=usd(stock["price"]),
+                   total=usd(totalPurchasePrice),
+                   symbol=stock["symbol"],
+                   id=session["user_id"])
+    else:
+        sharesTotalNum = acquiredShares[0]["shares"] + int(numSharesToBuy)
+        transactionsSharesUpdateQuery = "UPDATE transactions SET shares=:shares, total=:total WHERE id=:id AND symbol=:symbol"
+        db.execute(transactionsSharesUpdateQuery,
+                   shares=sharesTotalNum,
+                   total=usd(sharesTotalNum * (stock["price"])),
+                   id=session["user_id"],
+                   symbol=stock["symbol"])
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -73,29 +110,26 @@ def buy():
         if (not numSharesToBuy) or (not numSharesToBuy.isdigit()) or int(numSharesToBuy) <= 0:
             return apology("invalid number", 400)
 
-        money = db.execute("SELECT cash FROM users WHERE id=:id", id=session["user_id"])
-        cashAvailable = float(money[0]["cash"])
-        totalPurchasePrice = stock['price'] * int(numSharesToBuy)
+        usersSashSelectionQuery = "SELECT cash FROM users WHERE id=:id"
+        money = db.execute(usersSashSelectionQuery,
+                           id=session["user_id"])
 
+        cashAvailable = float(money[0]["cash"])
+        totalPurchasePrice = stock["price"] * int(numSharesToBuy)
         if cashAvailable < totalPurchasePrice:
             return apology("not enough money to purchase", 400)
 
-        db.execute("UPDATE users SET cash = cash - :purchase WHERE id = :id",
-                   id=session["user_id"], purchase=totalPurchasePrice)
+        usersCashUpdateQuery = "UPDATE users SET cash = cash - :purchase WHERE id = :id"
+        db.execute(usersCashUpdateQuery,
+                   id=session["user_id"],
+                   purchase=totalPurchasePrice)
 
-        acquiredShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol",
-                                 id=session["user_id"], symbol=stock["symbol"])
-        if not acquiredShares:
-            db.execute("INSERT INTO transactions (name, shares, price, total, symbol, date, id)"
-                       "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :id)",
-                       name=stock["name"], shares=numSharesToBuy, price=usd(stock["price"]),
-                       total=usd(totalPurchasePrice), symbol=stock["symbol"], id=session["user_id"])
+        transactionsSharesSelectionQuery = "SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol"
+        acquiredShares = db.execute(transactionsSharesSelectionQuery,
+                                id=session["user_id"],
+                                symbol=stock["symbol"])
 
-        else:
-            sharesTotalNum = acquiredShares[0]["shares"] + int(numSharesToBuy)
-            db.execute("UPDATE transactions SET shares=:shares, total=:total WHERE id=:id AND symbol=:symbol",
-                       shares=sharesTotalNum, total=usd(sharesTotalNum * (stock["price"])), id=session["user_id"],
-                       symbol=stock["symbol"])
+        handleBuyingProcess(acquiredShares, stock, numSharesToBuy, totalPurchasePrice)
 
         return redirect("/")
 
@@ -203,6 +237,8 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
+
+
     if request.method == "POST":
         stock = request.form.get("symbol")
         if not stock:
@@ -212,8 +248,11 @@ def sell():
         if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0):
             return apology("Invalid transaction", 400)
 
-        acquiredShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol= :symbol",
-                                    id=session["user_id"], symbol=stock)
+        transactionsSharesSelectionQuery = "SELECT shares FROM transactions WHERE id = :id AND symbol= :symbol"
+
+        acquiredShares = db.execute(transactionsSharesSelectionQuery,
+                                    id=session["user_id"],
+                                    symbol=stock)
         acquiredSharesNum = acquiredShares[0]["shares"]
 
         if int(numSharesToSell) > acquiredSharesNum:
@@ -223,22 +262,35 @@ def sell():
         totalSellPrice = int(numSharesToSell) * quote["price"]
 
         if acquiredSharesNum - int(numSharesToSell) > 0:
-            db.execute("UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol",
-                       numSold=int(numSharesToSell), totalSellPrice=usd(totalSellPrice), id=session["user_id"], symbol=stock)
+            transactionsSharesTotalUpdateQuery = "UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice" \
+                                                 " WHERE id=:id AND symbol=:symbol"
+            db.execute(transactionsSharesTotalUpdateQuery,
+                       numSold=int(numSharesToSell),
+                       totalSellPrice=usd(totalSellPrice),
+                       id=session["user_id"],
+                       symbol=stock)
 
         else:
-            db.execute("UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol",
-                       totalSellPrice=usd(totalSellPrice),  id=session["user_id"], symbol=stock)
-            db.execute("DELETE FROM transactions WHERE id=:id AND symbol=:symbol",
-                        id=session["user_id"], symbol=stock)
+            transactionsTotalUpdateQuery = "UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol"
+            db.execute(transactionsTotalUpdateQuery,
+                       totalSellPrice=usd(totalSellPrice),
+                       id=session["user_id"],
+                       symbol=stock)
 
-        db.execute("UPDATE users SET cash = cash + :moneyGained WHERE id = :id",
-                   id=session["user_id"], moneyGained=totalSellPrice)
+            transactionsStockDeletionQuery = "DELETE FROM transactions WHERE id=:id AND symbol=:symbol"
+            db.execute(transactionsStockDeletionQuery,
+                       id=session["user_id"],
+                       symbol=stock)
+        usersCashUpdateQuery = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
+        db.execute(usersCashUpdateQuery,
+                   id=session["user_id"],
+                   moneyGained=totalSellPrice)
 
         return redirect("/")
 
     else:
-        acquiredShares = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
+        transactionsSharesSymbolSelectionQuery = "SELECT shares, symbol FROM transactions WHERE id = :id"
+        acquiredShares = db.execute(transactionsSharesSymbolSelectionQuery,
                                     id=session["user_id"])
         return render_template("sell.html", stocks=acquiredShares)
 
