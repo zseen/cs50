@@ -212,9 +212,9 @@ def sell():
         if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0):
             return apology("Invalid transaction", 400)
 
-        acquiredStocks = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
-                                    id=session["user_id"])
-        acquiredSharesNum = acquiredStocks[0]["shares"]
+        acquiredShares = db.execute("SELECT shares FROM transactions WHERE id = :id AND symbol= :symbol",
+                                    id=session["user_id"], symbol=stock)
+        acquiredSharesNum = acquiredShares[0]["shares"]
 
         if int(numSharesToSell) > acquiredSharesNum:
             return apology("not enough shares", 400)
@@ -223,14 +223,14 @@ def sell():
         totalSellPrice = int(numSharesToSell) * quote["price"]
 
         if acquiredSharesNum - int(numSharesToSell) > 0:
-            db.execute("UPDATE transactions SET shares=shares - :numSold, total=total+:totalSellPrice WHERE id=:id AND symbol=:symbol",
+            db.execute("UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol",
                        numSold=int(numSharesToSell), totalSellPrice=usd(totalSellPrice), id=session["user_id"], symbol=stock)
 
         else:
-            db.execute("UPDATE transactions SET total=total+:totalSellPrice WHERE id=:id AND symbol=:symbol",
+            db.execute("UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol",
                        totalSellPrice=usd(totalSellPrice),  id=session["user_id"], symbol=stock)
             db.execute("DELETE FROM transactions WHERE id=:id AND symbol=:symbol",
-                id=session["user_id"], symbol=stock)
+                        id=session["user_id"], symbol=stock)
 
         db.execute("UPDATE users SET cash = cash + :moneyGained WHERE id = :id",
                    id=session["user_id"], moneyGained=totalSellPrice)
@@ -238,9 +238,9 @@ def sell():
         return redirect("/")
 
     else:
-        acquiredStocks = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
+        acquiredShares = db.execute("SELECT shares, symbol FROM transactions WHERE id = :id",
                                     id=session["user_id"])
-        return render_template("sell.html", stocks=acquiredStocks)
+        return render_template("sell.html", stocks=acquiredShares)
 
 
 def errorhandler(e):
