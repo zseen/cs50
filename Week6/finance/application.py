@@ -69,14 +69,23 @@ def index():
     usersCashSelectionQuery = "SELECT cash FROM users WHERE id=:id"
     moneyAvailable = db.execute(usersCashSelectionQuery,
                                 id=session["user_id"])
-
     cash = moneyAvailable[0]["cash"]
     grandTotal = cash + totalSharesValue
 
     return render_template("index.html", stocks=updatedTransactions, cash=usd(cash), total=usd(totalSharesValue), grandTotal=usd(grandTotal))
 
 
-def handleBuyingProcess(acquiredShares, stock, numSharesToBuy, totalPurchasePrice):
+def handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice):
+    usersCashUpdateQuery = "UPDATE users SET cash = cash - :purchase WHERE id = :id"
+    db.execute(usersCashUpdateQuery,
+               id=session["user_id"],
+               purchase=totalPurchasePrice)
+
+    transactionsSharesSelectionQuery = "SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol"
+    acquiredShares = db.execute(transactionsSharesSelectionQuery,
+                                id=session["user_id"],
+                                symbol=stock["symbol"])
+
     if not acquiredShares:
         wholeTransactionsInsertionQuery = "INSERT INTO transactions (name, shares, price, total, symbol, date, id)" \
                                           "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :id)"
@@ -110,8 +119,8 @@ def buy():
         if (not numSharesToBuy) or (not numSharesToBuy.isdigit()) or int(numSharesToBuy) <= 0:
             return apology("invalid number", 400)
 
-        usersSashSelectionQuery = "SELECT cash FROM users WHERE id=:id"
-        money = db.execute(usersSashSelectionQuery,
+        usersCashSelectionQuery = "SELECT cash FROM users WHERE id=:id"
+        money = db.execute(usersCashSelectionQuery,
                            id=session["user_id"])
 
         cashAvailable = float(money[0]["cash"])
@@ -119,17 +128,7 @@ def buy():
         if cashAvailable < totalPurchasePrice:
             return apology("not enough money to purchase", 400)
 
-        usersCashUpdateQuery = "UPDATE users SET cash = cash - :purchase WHERE id = :id"
-        db.execute(usersCashUpdateQuery,
-                   id=session["user_id"],
-                   purchase=totalPurchasePrice)
-
-        transactionsSharesSelectionQuery = "SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol"
-        acquiredShares = db.execute(transactionsSharesSelectionQuery,
-                                id=session["user_id"],
-                                symbol=stock["symbol"])
-
-        handleBuyingProcess(acquiredShares, stock, numSharesToBuy, totalPurchasePrice)
+        handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice)
 
         return redirect("/")
 
@@ -237,8 +236,6 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-
-
     if request.method == "POST":
         stock = request.form.get("symbol")
         if not stock:
@@ -261,31 +258,7 @@ def sell():
         quote = lookup(stock)
         totalSellPrice = int(numSharesToSell) * quote["price"]
 
-        if acquiredSharesNum - int(numSharesToSell) > 0:
-            transactionsSharesTotalUpdateQuery = "UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice" \
-                                                 " WHERE id=:id AND symbol=:symbol"
-            db.execute(transactionsSharesTotalUpdateQuery,
-                       numSold=int(numSharesToSell),
-                       totalSellPrice=usd(totalSellPrice),
-                       id=session["user_id"],
-                       symbol=stock)
-
-        else:
-            transactionsTotalUpdateQuery = "UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol"
-            db.execute(transactionsTotalUpdateQuery,
-                       totalSellPrice=usd(totalSellPrice),
-                       id=session["user_id"],
-                       symbol=stock)
-
-            transactionsStockDeletionQuery = "DELETE FROM transactions WHERE id=:id AND symbol=:symbol"
-            db.execute(transactionsStockDeletionQuery,
-                       id=session["user_id"],
-                       symbol=stock)
-        usersCashUpdateQuery = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
-        db.execute(usersCashUpdateQuery,
-                   id=session["user_id"],
-                   moneyGained=totalSellPrice)
-
+        handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPrice)
         return redirect("/")
 
     else:
@@ -293,6 +266,33 @@ def sell():
         acquiredShares = db.execute(transactionsSharesSymbolSelectionQuery,
                                     id=session["user_id"])
         return render_template("sell.html", stocks=acquiredShares)
+
+
+def handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPrice):
+    if acquiredSharesNum - int(numSharesToSell) > 0:
+        transactionsSharesTotalUpdateQuery = "UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice" \
+                                             " WHERE id=:id AND symbol=:symbol"
+        db.execute(transactionsSharesTotalUpdateQuery,
+                   numSold=int(numSharesToSell),
+                   totalSellPrice=usd(totalSellPrice),
+                   id=session["user_id"],
+                   symbol=stock)
+    else:
+        transactionsTotalUpdateQuery = "UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol"
+        db.execute(transactionsTotalUpdateQuery,
+                   totalSellPrice=usd(totalSellPrice),
+                   id=session["user_id"],
+                   symbol=stock)
+
+        transactionsStockDeletionQuery = "DELETE FROM transactions WHERE id=:id AND symbol=:symbol"
+        db.execute(transactionsStockDeletionQuery,
+                   id=session["user_id"],
+                   symbol=stock)
+
+    usersCashUpdateQuery = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
+    db.execute(usersCashUpdateQuery,
+               id=session["user_id"],
+               moneyGained=totalSellPrice)
 
 
 def errorhandler(e):
