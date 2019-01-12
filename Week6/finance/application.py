@@ -106,6 +106,7 @@ def handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice):
                    symbol=stock["symbol"])
 
 
+
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
@@ -129,6 +130,19 @@ def buy():
             return apology("not enough money to purchase", 400)
 
         handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice)
+
+        action = "bought"
+        historyWholeInsertionQuery = "INSERT INTO history (name, shares, price, total, symbol, date, action, id)" \
+                                     "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :action, :id)"
+
+        db.execute(historyWholeInsertionQuery,
+                   name=stock["name"],
+                   shares=numSharesToBuy,
+                   price=usd(stock["price"]),
+                   total=usd(totalPurchasePrice),
+                   symbol=stock["symbol"],
+                   action=action,
+                   id=session["user_id"],)
 
         return redirect("/")
 
