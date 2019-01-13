@@ -104,7 +104,7 @@ def buy():
                    total=usd(totalPurchasePrice),
                    symbol=stock["symbol"],
                    action="bought",
-                   id=session["user_id"],)
+                   id=session["user_id"])
 
         return redirect("/")
 
@@ -213,8 +213,8 @@ def register():
 def sell():
     """Sell shares of stock"""
     if request.method == "POST":
-        stock = request.form.get("symbol")
-        if not stock:
+        stockSymbol = request.form.get("symbol")
+        if not stockSymbol:
             return apology("Please choose a valid symbol", 400)
 
         numSharesToSell = request.form.get("shares")
@@ -223,16 +223,26 @@ def sell():
 
         acquiredShares = db.execute(TRANSACTIONS_SHARES_SELECTION_WITH_SYMBOL_QUERY,
                                     id=session["user_id"],
-                                    symbol=stock)
+                                    symbol=stockSymbol)
         acquiredSharesNum = acquiredShares[0]["shares"]
 
         if int(numSharesToSell) > acquiredSharesNum:
             return apology("not enough shares", 400)
 
-        quote = lookup(stock)
+        quote = lookup(stockSymbol)
         totalSellPrice = int(numSharesToSell) * quote["price"]
 
-        handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPrice)
+        handleSellingProcess(acquiredSharesNum, numSharesToSell, stockSymbol, totalSellPrice)
+
+        db.execute(HISTORY_INSERTION_QUERY,
+                   name=quote["name"],
+                   shares=numSharesToSell,
+                   price=usd(quote["price"]),
+                   total=usd(totalSellPrice),
+                   symbol=stockSymbol,
+                   action="sold",
+                   id=session["user_id"])
+
         return redirect("/")
 
     else:
