@@ -36,24 +36,23 @@ Session(app)
 db = SQL("sqlite:///finance.db")
 
 
-TRANSACTIONS_PRICE_TOTAL_UPDATE_QUERY = "UPDATE transactions SET price=:price,total=:total WHERE id=:id AND symbol=:symbol"
-TRANSACTIONS_WHOLE_SELECTION_QUERY = "SELECT name, symbol, shares, price, total FROM transactions WHERE id=:id"
+TRANSACTIONS_PRICE_TOTAL_UPDATE_QUERY = "UPDATE transactions SET price=:price, total=:total WHERE id=:id AND symbol=:symbol"
+TRANSACTIONS_ALL_SELECTION_QUERY = "SELECT name, symbol, shares, price, total FROM transactions WHERE id=:id"
 TRANSACTIONS_SHARES_SELECTION_WITH_SYMBOL_QUERY = "SELECT shares FROM transactions WHERE id = :id AND symbol=:symbol"
-TRANSACTIONS_WHOLE_INSERTION_QUERY = "INSERT INTO transactions (name, shares, price, total, symbol, date, id)" \
+TRANSACTIONS_INSERTION_QUERY = "INSERT INTO transactions (name, shares, price, total, symbol, date, id)" \
                                      "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :id)"
 TRANSACTIONS_SHARES_TOTAL_UPDATE_WITH_SYMBOL_QUERY = "UPDATE transactions SET shares=:shares, total=:total WHERE id=:id AND symbol=:symbol"
 TRANSACTIONS_SHARES_SYMBOL_SELECTION_QUERY = "SELECT shares, symbol FROM transactions WHERE id = :id"
 TRANSACTIONS_SHARE_TOTAL_UPDATE_SELLING_QUERY = "UPDATE transactions SET shares=shares - :numSold, total=total + :totalSellPrice " \
                                                 "WHERE id=:id AND symbol=:symbol"
-TRANSACTIONS_WHOLE_DELETION_QUERY = "DELETE FROM transactions WHERE id=:id AND symbol=:symbol"
-TRANSACTIONS_TOTAL_UPDATE_SELLING_QUERY = "UPDATE transactions SET total=total + :totalSellPrice WHERE id=:id AND symbol=:symbol"
+TRANSACTIONS_DELETION_QUERY = "DELETE FROM transactions WHERE id=:id AND symbol=:symbol"
 
 USERS_CASH_UPDATE_QUERY = "UPDATE users SET cash = cash - :purchase WHERE id = :id"
 USERS_CASH_SELECTION_QUERY = "SELECT cash FROM users WHERE id=:id"
 USERS_USERNAME_PW_INSERTION_QUERY = "INSERT INTO users (username, hash) VALUES(:username, :hash)"
 USERS_CASH_UPDATE_SELLING_QUERY = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
 
-HISTORY_WHOLE_INSERTION_QUERY = "INSERT INTO history (name, shares, price, total, symbol, date, action, id)" \
+HISTORY_INSERTION_QUERY = "INSERT INTO history (name, shares, price, total, symbol, date, action, id)" \
                                 "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :action, :id)"
 
 
@@ -65,7 +64,7 @@ def index():
                         id=session["user_id"])
     totalSharesValue = getTotalSharesValue(stocks)
 
-    updatedTransactions = db.execute(TRANSACTIONS_WHOLE_SELECTION_QUERY,
+    updatedTransactions = db.execute(TRANSACTIONS_ALL_SELECTION_QUERY,
                                      id=session["user_id"])
     moneyAvailable = db.execute(USERS_CASH_SELECTION_QUERY,
                                 id=session["user_id"])
@@ -98,14 +97,13 @@ def buy():
 
         handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice)
 
-        action = "bought"
-        db.execute(HISTORY_WHOLE_INSERTION_QUERY,
+        db.execute(HISTORY_INSERTION_QUERY,
                    name=stock["name"],
                    shares=numSharesToBuy,
                    price=usd(stock["price"]),
                    total=usd(totalPurchasePrice),
                    symbol=stock["symbol"],
-                   action=action,
+                   action="bought",
                    id=session["user_id"],)
 
         return redirect("/")
@@ -279,7 +277,7 @@ def handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice):
                                 symbol=stock["symbol"])
 
     if not acquiredShares:
-        db.execute(TRANSACTIONS_WHOLE_INSERTION_QUERY,
+        db.execute(TRANSACTIONS_INSERTION_QUERY,
                    name=stock["name"],
                    shares=numSharesToBuy,
                    price=usd(stock["price"]),
@@ -303,12 +301,7 @@ def handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPri
                    id=session["user_id"],
                    symbol=stock)
     else:
-        db.execute(TRANSACTIONS_TOTAL_UPDATE_SELLING_QUERY,
-                   totalSellPrice=usd(totalSellPrice),
-                   id=session["user_id"],
-                   symbol=stock)
-
-        db.execute(TRANSACTIONS_WHOLE_DELETION_QUERY,
+        db.execute(TRANSACTIONS_DELETION_QUERY,
                    id=session["user_id"],
                    symbol=stock)
 
