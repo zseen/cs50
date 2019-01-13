@@ -51,9 +51,12 @@ USERS_CASH_UPDATE_QUERY = "UPDATE users SET cash = cash - :purchase WHERE id = :
 USERS_CASH_SELECTION_QUERY = "SELECT cash FROM users WHERE id=:id"
 USERS_USERNAME_PW_INSERTION_QUERY = "INSERT INTO users (username, hash) VALUES(:username, :hash)"
 USERS_CASH_UPDATE_SELLING_QUERY = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
+USERS_HASH_SELECTION_QUERY = "SELECT hash FROM users WHERE id=:id"
+USERS_HASH_UPDATE_QUERY = "UPDATE users SET hash=:hashedNewPW WHERE id=:id"
 
 HISTORY_INSERTION_QUERY = "INSERT INTO history (name, shares, price, total, symbol, date, action, id)" \
                                 "VALUES(:name, :shares, :price, :total, :symbol, datetime('now'), :action, :id)"
+HISTORY_ALL_SELECT_ORDERED_BY_DATE_QUERY = "SELECT name, symbol, shares, price, total, date, action FROM history WHERE id=:id ORDER BY date DESC"
 
 
 @app.route("/")
@@ -116,8 +119,8 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    rows = db.execute("SELECT name, symbol, shares, price, total, date, action FROM history WHERE id=:id ORDER BY date DESC",
-               id=session["user_id"])
+    rows = db.execute(HISTORY_ALL_SELECT_ORDERED_BY_DATE_QUERY,
+                      id=session["user_id"])
 
     return render_template("history.html", stocks=rows)
 
@@ -252,6 +255,37 @@ def sell():
         acquiredShares = db.execute(TRANSACTIONS_SHARES_SYMBOL_SELECTION_QUERY,
                                     id=session["user_id"])
         return render_template("sell.html", stocks=acquiredShares)
+
+
+@app.route("/changePW", methods=["GET", "POST"])
+@login_required
+def changePW():
+    if request.method == "POST":
+        presumedOldPassword = request.form.get("old_password")
+        if not presumedOldPassword:
+            return apology("Missing old password", 400)
+
+        newPassword = request.form.get("new_password")
+        if not newPassword:
+            return apology("Missing new password", 400)
+
+        hashedOldPWRow = db.execute(USERS_HASH_SELECTION_QUERY,
+                                    id=session["user_id"])
+
+        hashedOldPW = hashedOldPWRow[0]["hash"]
+
+        isPresumedCorrect = check_password_hash(hashedOldPW, presumedOldPassword)
+        if not isPresumedCorrect:
+            return apology("Incorrect old password", 400)
+
+        hashedNewPassword = generate_password_hash(newPassword)
+        db.execute(USERS_HASH_UPDATE_QUERY,
+                   hashedNewPW=hashedNewPassword,
+                   id=session["user_id"])
+
+        return redirect("/")
+    else:
+        return render_template("passwordchange.html")
 
 
 def errorhandler(e):
