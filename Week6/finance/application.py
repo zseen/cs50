@@ -50,7 +50,7 @@ TRANSACTIONS_DELETION_QUERY = "DELETE FROM transactions WHERE id=:id AND symbol=
 USERS_CASH_UPDATE_QUERY = "UPDATE users SET cash = cash - :purchase WHERE id = :id"
 USERS_CASH_SELECTION_QUERY = "SELECT cash FROM users WHERE id=:id"
 USERS_USERNAME_PW_INSERTION_QUERY = "INSERT INTO users (username, hash) VALUES(:username, :hash)"
-USERS_CASH_UPDATE_SELLING_QUERY = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
+USERS_CASH_UPDATE_GAINED_QUERY = "UPDATE users SET cash = cash + :moneyGained WHERE id = :id"
 USERS_HASH_SELECTION_QUERY = "SELECT hash FROM users WHERE id=:id"
 USERS_HASH_UPDATE_QUERY = "UPDATE users SET hash=:hashedNewPW WHERE id=:id"
 
@@ -288,6 +288,22 @@ def changePW():
         return render_template("passwordchange.html")
 
 
+@app.route("/addMoreCash", methods=["GET", "POST"])
+@login_required
+def addMoreCash():
+    if request.method == "POST":
+        cashToAdd = float(request.form.get("cash_to_add"))
+        if not cashToAdd:
+            return apology("Amount field left blank")
+
+        db.execute(USERS_CASH_UPDATE_GAINED_QUERY,
+                   moneyGained=cashToAdd,
+                   id=session["user_id"])
+        return redirect("/")
+    else:
+        return render_template("addMoreCash.html")
+
+
 def errorhandler(e):
     """Handle error"""
     return apology(e.name, e.code)
@@ -352,7 +368,7 @@ def handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPri
                    id=session["user_id"],
                    symbol=stock)
 
-    db.execute(USERS_CASH_UPDATE_SELLING_QUERY,
+    db.execute(USERS_CASH_UPDATE_GAINED_QUERY,
                id=session["user_id"],
                moneyGained=totalSellPrice)
 
