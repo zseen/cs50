@@ -6,6 +6,7 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions
 from werkzeug.security import check_password_hash, generate_password_hash
+import re
 
 from helpers import apology, login_required, lookup, usd
 
@@ -35,6 +36,7 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
+#MIN_PW_LENGTH = 8
 
 TRANSACTIONS_PRICE_TOTAL_UPDATE_QUERY = "UPDATE transactions SET price=:price, total=:total WHERE id=:id AND symbol=:symbol"
 TRANSACTIONS_ALL_SELECTION_QUERY = "SELECT name, symbol, shares, price, total FROM transactions WHERE id=:id"
@@ -60,6 +62,7 @@ HISTORY_ALL_SELECT_ORDERED_BY_DATE_QUERY = "SELECT name, symbol, shares, price, 
 
 
 @app.route("/")
+@app.route("/displayStocksAndBalance")
 @login_required
 def index():
     """Show portfolio of stocks"""
@@ -195,6 +198,13 @@ def register():
             return apology("must provide a username", 400)
         elif not request.form.get("password"):
             return apology("must provide a password", 400)
+
+        password = request.form.get("password")
+        # min 8 chars pw length, at least 1 upper char, at least 1 lower char, no spec chars, at least 1 digit
+        #if not checkPasswordValid(password, MIN_PW_LENGTH):
+            #return apology("Your password does not meet the requirements", 400)
+        if not checkPasswordValidRegex(password):
+            return apology("Your password does not meet the requirements", 400)
         elif not request.form.get("confirmation"):
             return apology("must confirm your password", 400)
         elif request.form.get("password") != request.form.get("confirmation"):
@@ -269,6 +279,12 @@ def changePW():
         if not newPassword:
             return apology("Missing new password", 400)
 
+        #if not checkPasswordValid(newPassword, MIN_PW_LENGTH):
+            #return apology("You password does not meet the requirements", 400)
+
+        if not checkPasswordValidRegex(newPassword):
+            return apology("You password does not meet the requirements", 400)
+
         hashedOldPWRow = db.execute(USERS_HASH_SELECTION_QUERY,
                                     id=session["user_id"])
 
@@ -283,7 +299,7 @@ def changePW():
                    hashedNewPW=hashedNewPassword,
                    id=session["user_id"])
 
-        return redirect("/")
+        return render_template("pwChangeSuccesful.html")
     else:
         return render_template("passwordchange.html")
 
@@ -372,3 +388,26 @@ def handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPri
                id=session["user_id"],
                moneyGained=totalSellPrice)
 
+
+# def checkPasswordValid(password, minLength):
+#     if len(password) < minLength:
+#         return False
+#
+#     lowerCounter = 0
+#     upperCounter = 0
+#     digitCounter = 0
+#
+#     for char in password:
+#         if char.isdigit():
+#             digitCounter += 1
+#         elif char.islower():
+#                 lowerCounter += 1
+#         elif char.isupper():
+#                 upperCounter += 1
+#         else:
+#             return False
+#
+#     return digitCounter >= 1 and lowerCounter >=1 and upperCounter >= 1
+
+def checkPasswordValidRegex(password):
+    return re.search(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])([A-z0-9]+){8,}$", password)
