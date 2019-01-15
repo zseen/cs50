@@ -84,38 +84,37 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    if request.method == "POST":
-        stock = lookup(request.form.get("symbol"))
-        if not stock:
-            return apology("must provide symbol", 400)
-
-        numSharesToBuy = request.form.get("shares")
-        if (not numSharesToBuy) or (not numSharesToBuy.isdigit()) or int(numSharesToBuy) <= 0:
-            return apology("invalid number", 400)
-
-        money = db.execute(USERS_CASH_SELECTION_QUERY,
-                           id=session["user_id"])
-
-        cashAvailable = float(money[0]["cash"])
-        totalPurchasePrice = stock["price"] * int(numSharesToBuy)
-        if cashAvailable < totalPurchasePrice:
-            return apology("not enough money to purchase", 400)
-
-        handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice)
-
-        db.execute(HISTORY_INSERTION_QUERY,
-                   name=stock["name"],
-                   shares=numSharesToBuy,
-                   price=usd(stock["price"]),
-                   total=usd(totalPurchasePrice),
-                   symbol=stock["symbol"],
-                   action="bought",
-                   id=session["user_id"])
-
-        return redirect("/")
-
-    else:
+    if request.method != "POST":
         return render_template("buy.html")
+
+    stock = lookup(request.form.get("symbol"))
+    if not stock:
+        return apology("must provide symbol", 400)
+
+    numSharesToBuy = request.form.get("shares")
+    if (not numSharesToBuy) or (not numSharesToBuy.isdigit()) or int(numSharesToBuy) <= 0:
+        return apology("invalid number", 400)
+
+    money = db.execute(USERS_CASH_SELECTION_QUERY,
+                       id=session["user_id"])
+
+    cashAvailable = float(money[0]["cash"])
+    totalPurchasePrice = stock["price"] * int(numSharesToBuy)
+    if cashAvailable < totalPurchasePrice:
+        return apology("not enough money to purchase", 400)
+
+    handleBuyingProcess(stock, numSharesToBuy, totalPurchasePrice)
+
+    db.execute(HISTORY_INSERTION_QUERY,
+               name=stock["name"],
+               shares=numSharesToBuy,
+               price=usd(stock["price"]),
+               total=usd(totalPurchasePrice),
+               symbol=stock["symbol"],
+               action="bought",
+               id=session["user_id"])
+
+    return redirect("/")
 
 
 @app.route("/history")
@@ -193,125 +192,123 @@ def quote():
 def register():
     """Register user"""
     session.clear()
-    if request.method == "POST":
-        if not request.form.get("username"):
-            return apology("must provide a username", 400)
-        elif not request.form.get("password"):
-            return apology("must provide a password", 400)
-
-        password = request.form.get("password")
-        # min 8 chars pw length, at least 1 upper char, at least 1 lower char, no spec chars, at least 1 digit
-        if not checkPasswordValid(password, MIN_PW_LENGTH):
-            return apology("Your password does not meet the requirements", 400)
-        elif not request.form.get("confirmation"):
-            return apology("must confirm your password", 400)
-        elif request.form.get("password") != request.form.get("confirmation"):
-            return apology("password mismatch", 400)
-
-        hashedPW = generate_password_hash(request.form.get("password"))
-        newRegisteredUser = db.execute(USERS_USERNAME_PW_INSERTION_QUERY,
-                                        username=request.form.get("username"),
-                                        hash=hashedPW)
-        if not newRegisteredUser:
-            return apology("username already taken", 400)
-
-        session["user_id"] = newRegisteredUser
-        return redirect("/")
-
-    else:
+    if request.method != "POST":
         return render_template("register.html")
+
+    if not request.form.get("username"):
+        return apology("must provide a username", 400)
+    elif not request.form.get("password"):
+        return apology("must provide a password", 400)
+
+    password = request.form.get("password")
+    # min 8 chars pw length, at least 1 upper char, at least 1 lower char, no spec chars, at least 1 digit
+    if not checkPasswordValid(password, MIN_PW_LENGTH):
+        return apology("Your password does not meet the requirements", 400)
+    elif not request.form.get("confirmation"):
+        return apology("must confirm your password", 400)
+    elif request.form.get("password") != request.form.get("confirmation"):
+        return apology("password mismatch", 400)
+
+    hashedPW = generate_password_hash(request.form.get("password"))
+    newRegisteredUser = db.execute(USERS_USERNAME_PW_INSERTION_QUERY,
+                                    username=request.form.get("username"),
+                                    hash=hashedPW)
+    if not newRegisteredUser:
+        return apology("username already taken", 400)
+
+    session["user_id"] = newRegisteredUser
+    return redirect("/")
 
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
     """Sell shares of stock"""
-    if request.method == "POST":
-        stockSymbol = request.form.get("symbol")
-        if not stockSymbol:
-            return apology("Please choose a valid symbol", 400)
-
-        numSharesToSell = request.form.get("shares")
-        if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0):
-            return apology("Invalid transaction", 400)
-
-        acquiredShares = db.execute(TRANSACTIONS_SHARES_SELECTION_WITH_SYMBOL_QUERY,
-                                    id=session["user_id"],
-                                    symbol=stockSymbol)
-        acquiredSharesNum = acquiredShares[0]["shares"]
-
-        if int(numSharesToSell) > acquiredSharesNum:
-            return apology("not enough shares", 400)
-
-        quote = lookup(stockSymbol)
-        totalSellPrice = int(numSharesToSell) * quote["price"]
-
-        handleSellingProcess(acquiredSharesNum, numSharesToSell, stockSymbol, totalSellPrice)
-
-        db.execute(HISTORY_INSERTION_QUERY,
-                   name=quote["name"],
-                   shares=numSharesToSell,
-                   price=usd(quote["price"]),
-                   total=usd(totalSellPrice),
-                   symbol=stockSymbol,
-                   action="sold",
-                   id=session["user_id"])
-
-        return redirect("/")
-
-    else:
+    if request.method != "POST":
         acquiredShares = db.execute(TRANSACTIONS_SHARES_SYMBOL_SELECTION_QUERY,
                                     id=session["user_id"])
         return render_template("sell.html", stocks=acquiredShares)
+
+    stockSymbol = request.form.get("symbol")
+    if not stockSymbol:
+        return apology("Please choose a valid symbol", 400)
+
+    numSharesToSell = request.form.get("shares")
+    if (not numSharesToSell) or (not numSharesToSell.isdigit()) or (int(numSharesToSell) <= 0):
+        return apology("Invalid transaction", 400)
+
+    acquiredShares = db.execute(TRANSACTIONS_SHARES_SELECTION_WITH_SYMBOL_QUERY,
+                                id=session["user_id"],
+                                symbol=stockSymbol)
+    acquiredSharesNum = acquiredShares[0]["shares"]
+
+    if int(numSharesToSell) > acquiredSharesNum:
+        return apology("not enough shares", 400)
+
+    quote = lookup(stockSymbol)
+    totalSellPrice = int(numSharesToSell) * quote["price"]
+
+    handleSellingProcess(acquiredSharesNum, numSharesToSell, stockSymbol, totalSellPrice)
+
+    db.execute(HISTORY_INSERTION_QUERY,
+               name=quote["name"],
+               shares=numSharesToSell,
+               price=usd(quote["price"]),
+               total=usd(totalSellPrice),
+               symbol=stockSymbol,
+               action="sold",
+               id=session["user_id"])
+
+    return redirect("/")
 
 
 @app.route("/changePW", methods=["GET", "POST"])
 @login_required
 def changePW():
-    if request.method == "POST":
-        presumedOldPassword = request.form.get("old_password")
-        if not presumedOldPassword:
-            return apology("Missing old password", 400)
-
-        newPassword = request.form.get("new_password")
-        if not newPassword:
-            return apology("Missing new password", 400)
-
-        if not checkPasswordValid(newPassword, MIN_PW_LENGTH):
-            return apology("You password does not meet the requirements", 400)
-
-        hashedOldPWRow = db.execute(USERS_HASH_SELECTION_QUERY,
-                                    id=session["user_id"])
-        hashedOldPW = hashedOldPWRow[0]["hash"]
-
-        isPresumedCorrect = check_password_hash(hashedOldPW, presumedOldPassword)
-        if not isPresumedCorrect:
-            return apology("Incorrect old password", 400)
-
-        hashedNewPassword = generate_password_hash(newPassword)
-        db.execute(USERS_HASH_UPDATE_QUERY,
-                   hashedNewPW=hashedNewPassword,
-                   id=session["user_id"])
-
-        return render_template("pwChangeSuccesful.html")
-    else:
+    if request.method != "POST":
         return render_template("passwordchange.html")
+
+    presumedOldPassword = request.form.get("old_password")
+    if not presumedOldPassword:
+        return apology("Missing old password", 400)
+
+    newPassword = request.form.get("new_password")
+    if not newPassword:
+        return apology("Missing new password", 400)
+
+    if not checkPasswordValid(newPassword, MIN_PW_LENGTH):
+        return apology("You password does not meet the requirements", 400)
+
+    hashedOldPWRow = db.execute(USERS_HASH_SELECTION_QUERY,
+                                id=session["user_id"])
+    hashedOldPW = hashedOldPWRow[0]["hash"]
+
+    isPresumedCorrect = check_password_hash(hashedOldPW, presumedOldPassword)
+    if not isPresumedCorrect:
+        return apology("Incorrect old password", 400)
+
+    hashedNewPassword = generate_password_hash(newPassword)
+    db.execute(USERS_HASH_UPDATE_QUERY,
+               hashedNewPW=hashedNewPassword,
+               id=session["user_id"])
+
+    return render_template("pwChangeSuccesful.html")
 
 
 @app.route("/addMoreCash", methods=["GET", "POST"])
 @login_required
 def addMoreCash():
-    if request.method == "POST":
-        cashToAdd = float(request.form.get("cash_to_add"))
-        if not cashToAdd:
-            return apology("Amount field left blank")
-
-        db.execute(USERS_CASH_UPDATE_GAINED_QUERY,
-                   moneyGained=cashToAdd,
-                   id=session["user_id"])
-        return redirect("/")
-    else:
+    if request.method != "POST":
         return render_template("addMoreCash.html")
+
+    cashToAdd = float(request.form.get("cash_to_add"))
+    if not cashToAdd:
+        return apology("Amount field left blank")
+
+    db.execute(USERS_CASH_UPDATE_GAINED_QUERY,
+               moneyGained=cashToAdd,
+               id=session["user_id"])
+    return redirect("/")
 
 
 def errorhandler(e):
