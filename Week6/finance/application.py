@@ -36,7 +36,7 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
-#MIN_PW_LENGTH = 8
+MIN_PW_LENGTH = 8
 
 TRANSACTIONS_PRICE_TOTAL_UPDATE_QUERY = "UPDATE transactions SET price=:price, total=:total WHERE id=:id AND symbol=:symbol"
 TRANSACTIONS_ALL_SELECTION_QUERY = "SELECT name, symbol, shares, price, total FROM transactions WHERE id=:id"
@@ -201,9 +201,7 @@ def register():
 
         password = request.form.get("password")
         # min 8 chars pw length, at least 1 upper char, at least 1 lower char, no spec chars, at least 1 digit
-        #if not checkPasswordValid(password, MIN_PW_LENGTH):
-            #return apology("Your password does not meet the requirements", 400)
-        if not checkPasswordValidRegex(password):
+        if not checkPasswordValid(password, MIN_PW_LENGTH):
             return apology("Your password does not meet the requirements", 400)
         elif not request.form.get("confirmation"):
             return apology("must confirm your password", 400)
@@ -279,15 +277,11 @@ def changePW():
         if not newPassword:
             return apology("Missing new password", 400)
 
-        #if not checkPasswordValid(newPassword, MIN_PW_LENGTH):
-            #return apology("You password does not meet the requirements", 400)
-
-        if not checkPasswordValidRegex(newPassword):
+        if not checkPasswordValid(newPassword, MIN_PW_LENGTH):
             return apology("You password does not meet the requirements", 400)
 
         hashedOldPWRow = db.execute(USERS_HASH_SELECTION_QUERY,
                                     id=session["user_id"])
-
         hashedOldPW = hashedOldPWRow[0]["hash"]
 
         isPresumedCorrect = check_password_hash(hashedOldPW, presumedOldPassword)
@@ -389,25 +383,22 @@ def handleSellingProcess(acquiredSharesNum, numSharesToSell, stock, totalSellPri
                moneyGained=totalSellPrice)
 
 
-# def checkPasswordValid(password, minLength):
-#     if len(password) < minLength:
-#         return False
-#
-#     lowerCounter = 0
-#     upperCounter = 0
-#     digitCounter = 0
-#
-#     for char in password:
-#         if char.isdigit():
-#             digitCounter += 1
-#         elif char.islower():
-#                 lowerCounter += 1
-#         elif char.isupper():
-#                 upperCounter += 1
-#         else:
-#             return False
-#
-#     return digitCounter >= 1 and lowerCounter >=1 and upperCounter >= 1
+def checkPasswordValid(password, minLength):
+    if len(password) < minLength:
+        return False
 
-def checkPasswordValidRegex(password):
-    return re.search(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])([A-z0-9]+){8,}$", password)
+    lowerCounter = 0
+    upperCounter = 0
+    digitCounter = 0
+
+    for char in password:
+        if char.isdigit():
+            digitCounter += 1
+        elif char.islower():
+                lowerCounter += 1
+        elif char.isupper():
+                upperCounter += 1
+        else:
+            return False
+
+    return digitCounter >= 1 and lowerCounter >=1 and upperCounter >= 1
