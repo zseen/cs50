@@ -67,9 +67,12 @@ function addMarker(place)
     var marker = new google.maps.Marker({
     position: myLatLng,
     map:map,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
     title: place["place_name"] + ", " + place["admin_name1"],
     label: place["place_name"] + ", " + place["admin_name1"],
     });
+
 
     $.getJSON("/articles?geo=" + place.postal_code, function(articles) {
         if (!$.isEmptyObject(articles)) {
@@ -113,7 +116,7 @@ function configure()
     // Configure typeahead
     $("#q").typeahead({
         highlight: false,
-        minLength: 1
+        minLength: 3
     },
     {
         display: function(suggestion) { return null; },
