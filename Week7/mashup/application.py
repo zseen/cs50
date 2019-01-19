@@ -48,24 +48,12 @@ def search():
 
     if request.method == "GET":
         q = request.args.get("q") + "%"
-        if not q:
-            raise RuntimeError("Location unspecified")
 
-        q = q.split(",")
-
-        if len(q) == 1:
-            rows = db.execute("SELECT * FROM places WHERE postal_code LIKE :q OR place_name LIKE :q OR admin_name1 LIKE :q",
-            q=q[0])
-
-        elif len(q) == 2:
-            rows = db.execute("SELECT * FROM places WHERE place_name LIKE :q0 OR admin_name1 LIKE :q1 OR admin_code1 LIKE :q1 OR country_code LIKE :q1",
-            q0=q[0], q1=q[1])
-
-        elif len(q) == 3:
-            rows = db.execute("SELECT * FROM places WHERE place_name LIKE :q0 OR admin_name1 LIKE :q1 OR country_code LIKE :q2",
-            q0=q[0], q1=q[1], q2=q[2])
+        if q:
+            rows = db.execute("SELECT * FROM places WHERE postal_code LIKE :q OR place_name LIKE :q OR admin_code1 LIKE :q ",
+            q=q)
         else:
-            raise RuntimeError("Too many parameters")
+            raise RuntimeError("No such place")
 
         return jsonify(rows[:10])
 
