@@ -38,7 +38,7 @@ $(document).ready(function() {
     // Options for map
     // https://developers.google.com/maps/documentation/javascript/reference#MapOptions
     let options = {
-        center: {lat: 41.3184, lng: -72.9318}, // Stanford, California --> Changed to New Haven, CT
+        center: {lat: 38.0239, lng: -86.577}, // Stanford, California --> Changed to Derby, Indiana
         disableDefaultUI: true,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         maxZoom: 14,
@@ -66,7 +66,7 @@ function addMarker(place)
     myLatLng = new google.maps.LatLng(place["latitude"],place["longitude"]);
     var marker = new google.maps.Marker({
     position: myLatLng,
-    map:map,
+    map: map,
     draggable: true,
     animation: google.maps.Animation.DROP,
     title: place["place_name"] + ", " + place["admin_name1"],

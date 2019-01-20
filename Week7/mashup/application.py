@@ -30,32 +30,29 @@ def index():
 @app.route("/articles")
 def articles():
     """Look up articles for geo"""
-    if request.method == "GET":
-        location = request.args.get("geo")
+    location = request.args.get("geo")
+    if not location:
+        raise RuntimeError("Location unspecified")
 
-        if not location:
-            raise RuntimeError("Location unspecified")
+    newsArticles = lookup(location)
+    firstFiveArticles = newsArticles[:5]
 
-        newsArticles = lookup(location)
-        firstFiveArticles = newsArticles[:5]
+    return jsonify(firstFiveArticles)
 
-        return jsonify(firstFiveArticles)
 
 
 @app.route("/search")
 def search():
     """Search for places that match query"""
+    place = request.args.get("q") + "%"
+    if not place:
+        raise RuntimeError("No such place")
 
-    if request.method == "GET":
-        q = request.args.get("q") + "%"
+    rows = db.execute(
+        "SELECT * FROM places WHERE postal_code LIKE :q OR place_name LIKE :q OR admin_code1 LIKE :q ",
+        q=place)
 
-        if q:
-            rows = db.execute("SELECT * FROM places WHERE postal_code LIKE :q OR place_name LIKE :q OR admin_code1 LIKE :q ",
-            q=q)
-        else:
-            raise RuntimeError("No such place")
-
-        return jsonify(rows[:10])
+    return jsonify(rows[:10])
 
 
 @app.route("/update")
