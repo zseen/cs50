@@ -63,9 +63,9 @@ $(document).ready(function() {
 // Add marker for place to map
 function addMarker(place)
 {
-    myLatLng = new google.maps.LatLng(place["latitude"],place["longitude"]);
+    placeForMarker = new google.maps.LatLng(place["latitude"], place["longitude"]);
     var marker = new google.maps.Marker({
-    position: myLatLng,
+    position: placeForMarker,
     map: map,
     draggable: true,
     animation: google.maps.Animation.DROP,
@@ -90,8 +90,6 @@ function addMarker(place)
 
     markers.push(marker);
 }
-
-
 
 
 // Configure application
