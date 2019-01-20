@@ -38,7 +38,7 @@ $(document).ready(function() {
     // Options for map
     // https://developers.google.com/maps/documentation/javascript/reference#MapOptions
     let options = {
-        center: {lat: 37.4236, lng: -122.1619}, // Stanford, California
+        center: {lat: 38.0239, lng: -86.577}, // Stanford, California --> Changed to Derby, Indiana
         disableDefaultUI: true,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         maxZoom: 14,
@@ -63,7 +63,32 @@ $(document).ready(function() {
 // Add marker for place to map
 function addMarker(place)
 {
-    // TODO
+    placeForMarker = new google.maps.LatLng(place["latitude"], place["longitude"]);
+    var marker = new google.maps.Marker({
+    position: placeForMarker,
+    map: map,
+    draggable: true,
+    animation: google.maps.Animation.DROP,
+    title: place["place_name"] + ", " + place["admin_name1"],
+    label: place["place_name"] + ", " + place["admin_name1"],
+    });
+
+
+    $.getJSON("/articles?geo=" + place.postal_code, function(articles) {
+        if (!$.isEmptyObject(articles)) {
+            var articlesTitleWithLink = "<ul>";
+            for (var i = 0; i < articles.length; i++) {
+                articlesTitleWithLink += '<li><a target="_new" href="' + articles[i].link + '">' + articles[i].title + "</a></li>";
+            }
+            articlesTitleWithLink += "</ul>";
+        }
+
+        google.maps.event.addListener(marker, 'click', function() {
+            showInfo(marker, articlesTitleWithLink);
+        });
+    });
+
+    markers.push(marker);
 }
 
 
@@ -89,7 +114,7 @@ function configure()
     // Configure typeahead
     $("#q").typeahead({
         highlight: false,
-        minLength: 1
+        minLength: 3
     },
     {
         display: function(suggestion) { return null; },
@@ -98,7 +123,7 @@ function configure()
         templates: {
             suggestion: Handlebars.compile(
                 "<div>" +
-                "TODO" +
+                "{{place_name}}, {{admin_name1}}, {{postal_code}}" +
                 "</div>"
             )
         }
@@ -122,8 +147,8 @@ function configure()
     // Re-enable ctrl- and right-clicking (and thus Inspect Element) on Google Map
     // https://chrome.google.com/webstore/detail/allow-right-click/hompjdfbfmmmgflfjdlnkohcplmboaeo?hl=en
     document.addEventListener("contextmenu", function(event) {
-        event.returnValue = true; 
-        event.stopPropagation && event.stopPropagation(); 
+        event.returnValue = true;
+        event.stopPropagation && event.stopPropagation();
         event.cancelBubble && event.cancelBubble();
     }, true);
 
@@ -138,7 +163,9 @@ function configure()
 // Remove markers from map
 function removeMarkers()
 {
-    // TODO
+    for (var markerIndex = 0; markerIndex < markers.length; ++markerIndex){
+        markers[markerIndex].setMap(null);
+    }
 }
 
 
@@ -150,7 +177,7 @@ function search(query, syncResults, asyncResults)
         q: query
     };
     $.getJSON("/search", parameters, function(data, textStatus, jqXHR) {
-     
+
         // Call typeahead's callback with search results (i.e., places)
         asyncResults(data);
     });
@@ -184,7 +211,7 @@ function showInfo(marker, content)
 
 
 // Update UI's markers
-function update() 
+function update()
 {
     // Get map's bounds
     let bounds = map.getBounds();
